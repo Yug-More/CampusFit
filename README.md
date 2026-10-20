@@ -35,7 +35,12 @@ We also plan to include search fields, dropdown menus, sliders, buttons, and oth
 ### 3. Data Analysis and Visualization Plan
 **Responsible: Sean Aminov (Author #2)**
 
-*To be completed by Sean Aminov.*
+- Use Python, Pandas, and NumPy to analyze the college data collected from the College Scorecard API.
+- Compare institutions based on factors such as tuition costs, graduation rates, and available earnings information.
+- Develop a weighted scoring system that ranks colleges according to the user's selected preferences and priorities.
+- Implement a What-If Decision Simulator that recalculates college rankings when users adjust the importance of different factors.
+- Use Matplotlib to create visualizations, including bar charts and comparison graphs, to highlight differences between colleges.
+- Display the analysis results through the Flask interface to help students understand the trade-offs between affordability, academic outcomes, and potential earnings.
 
 ## Technologies
 
