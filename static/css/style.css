@@ -45,7 +45,11 @@ a[aria-current="page"] {
     font-weight: bold;
 }
 
-a:focus-visible {
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.results-table:focus-visible {
     outline: 3px solid #174d80;
     outline-offset: 4px;
 }
@@ -69,4 +73,111 @@ section {
 
 section h2 {
     margin-top: 0;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 1rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+label {
+    font-weight: bold;
+}
+
+input,
+select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 0.6rem;
+    border: 1px solid #718197;
+    border-radius: 4px;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+button {
+    display: inline-block;
+    box-sizing: border-box;
+    padding: 0.6rem 1rem;
+    border: 1px solid #174d80;
+    border-radius: 4px;
+    background: #174d80;
+    color: #fff;
+    font: inherit;
+    line-height: 1.4;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.secondary-button {
+    background: #fff;
+    color: #174d80;
+}
+
+[role="status"],
+.validation-message {
+    padding: 0.75rem;
+    border-left: 4px solid #174d80;
+    background: #eef4fa;
+    overflow-wrap: anywhere;
+}
+
+.validation-message {
+    margin-bottom: 1rem;
+    border-color: #9b351b;
+    background: #fff2ec;
+}
+
+.validation-message ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.results-table {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+caption {
+    margin-bottom: 0.75rem;
+    text-align: left;
+    font-weight: bold;
+}
+
+th,
+td {
+    padding: 0.7rem;
+    border-bottom: 1px solid #ccd5df;
+    vertical-align: top;
+}
+
+thead {
+    background: #eef4fa;
+}
+
+tbody tr:nth-child(even) {
+    background: #f8fafc;
 }

@@ -1,0 +1,41 @@
+school_id,name,city,state,institution_type,student_size,tuition_in_state,tuition_out_of_state,graduation_rate,median_earnings
+449339,American Public University System,Charles Town,WV,Private for-profit,40074,8400,8400,0.6012,41320
+100690,Amridge University,Montgomery,AL,Private nonprofit,241,,,0.5,40519
+104151,Arizona State University Campus Immersion,Tempe,AZ,Public,64674,12975,35167,0.6716,69111
+483124,Arizona State University Digital Immersion,Scottsdale,AZ,Public,53782,11974,14072,,69111
+142522,Brigham Young University-Idaho,Rexburg,ID,Private nonprofit,44397,4944,4944,0.5217,56190
+110565,California State University-Fullerton,Fullerton,CA,Public,38546,7952,21272,0.6792,69015
+224615,Dallas College,Dallas,TX,Public,43869,2970,7500,0.2412,44572
+101189,Faulkner University,Montgomery,AL,Private nonprofit,1549,26590,26590,0.3707,48627
+133951,Florida International University,Miami,FL,Public,39508,6565,20204,0.7762,65722
+104717,Grand Canyon University,Phoenix,AZ,Private nonprofit,73371,17900,17900,0.5419,50609
+101453,Heritage Christian University,Florence,AL,Private nonprofit,75,12710,12710,,47059
+101365,Herzing University-Birmingham,Birmingham,AL,Private nonprofit,442,13820,13820,0.2727,44255
+225423,Houston City College,Houston,TX,Public,40503,2040,5460,0.1735,42369
+101435,Huntingdon College,Montgomery,AL,Private nonprofit,879,29570,29570,0.4766,54423
+151351,Indiana University-Bloomington,Bloomington,IN,Public,37806,12144,42295,0.8004,70105
+150987,Ivy Tech Community College,Indianapolis,IN,Public,58267,5154,9935,0.433,40802
+486840,Kennesaw State University,Kennesaw,GA,Public,41254,5808,18072,0.5011,62766
+232557,Liberty University,Lynchburg,VA,Private nonprofit,50012,23171,23171,0.639,46945
+227182,Lone Star College System,The Woodlands,TX,Public,45188,3330,9390,0.1932,44187
+135717,Miami Dade College,Miami,FL,Public,46182,2838,9661,0.4675,45444
+171100,Michigan State University,East Lansing,MI,Public,40922,17256,44640,0.803,74168
+101675,Miles College,Fairfield,AL,Private nonprofit,1155,13264,13264,0.1941,38127
+101277,New Beginning College of Cosmetology,Albertville,AL,Private for-profit,81,,,0.5938,21712
+101912,Oakwood University,Huntsville,AL,Private nonprofit,1153,24112,24112,0.4716,47707
+204796,Ohio State University-Main Campus,Columbus,OH,Public,45638,13641,42423,0.8659,67080
+214777,Pennsylvania State University-Main Campus,University Park,PA,Public,42284,21098,43490,0.8542,71762
+243780,Purdue University-Main Campus,West Lafayette,IN,Public,44503,9992,28794,0.8403,80082
+101116,South University-Montgomery,Montgomery,AL,Private for-profit,299,18145,18145,0.1176,39314
+183026,Southern New Hampshire University,Manchester,NH,Private nonprofit,163164,18410,18410,0.4206,56870
+228547,Tarrant County College District,Fort Worth,TX,Public,42300,1998,8505,0.3016,45883
+228723,Texas A&M University-College Station,College Station,TX,Public,59615,13154,39974,0.8453,78159
+228778,The University of Texas at Austin,Austin,TX,Public,42855,11656,44816,0.892,81694
+104179,University of Arizona,Tucson,AZ,Public,42537,13906,43068,0.7092,67414
+132903,University of Central Florida,Orlando,FL,Public,59146,6368,24076,0.7785,63483
+225511,University of Houston,Houston,TX,Public,38380,9717,22427,0.6567,68423
+163204,University of Maryland Global Campus,Adelphi,MD,Public,49664,8280,12336,0.343,68110
+101693,University of Mobile,Mobile,AL,Private nonprofit,1307,27930,27930,0.5677,48418
+484613,University of Phoenix-Arizona,Phoenix,AZ,Private for-profit,85991,9552,9552,0.2072,43584
+138187,Valencia College,Orlando,FL,Public,39486,2664,9576,0.4951,45388
+433387,Western Governors University,Salt Lake City,UT,Private nonprofit,155088,8730,8730,0.5037,76999

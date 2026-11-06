@@ -151,6 +151,7 @@ activemq-data/
 
 # Environments
 .env
+.env.*
 .envrc
 .venv
 env/
@@ -218,3 +219,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local College Scorecard downloads; the small official sample stays committed.
+/data/colleges.csv
+/data/metadata.json
+
+# Editor temporary files and platform clutter.
+*.tmp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
