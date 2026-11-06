@@ -107,5 +107,75 @@ class ExplorerDataTests(unittest.TestCase):
         self.assertIn("$0", page)
 
 
+class ExplorerFilterRouteTests(unittest.TestCase):
+    def setUp(self):
+        from test_college_filters import test_colleges
+        self.records = test_colleges()
+        loader_patch = patch("app.get_available_college_data", return_value=(
+            self.records, {"retrieved_at": "2026-11-05T12:00:00+00:00"}, "Sample fallback", "",
+        ))
+        loader_patch.start()
+        self.addCleanup(loader_patch.stop)
+        app.config["TESTING"] = True
+        self.client = app.test_client()
+
+    def test_query_selections_remain_displayed(self):
+        query = {"name": "Alpha", "state": "CA", "institution_type": "Public",
+                 "maximum_tuition": "1000", "minimum_graduation": "50",
+                 "sort": "tuition_asc", "limit": "10"}
+        page = self.client.get("/explorer", query_string=query).get_data(as_text=True)
+        for value in ("Alpha", "1000", "50"):
+            self.assertIn(f'value="{value}"', page)
+        for value in ("CA", "Public", "tuition_asc", "10"):
+            self.assertIn(f'value="{value}" selected', page)
+        self.assertIn("Matching records: 1", page)
+        self.assertIn("Displayed results: 1", page)
+        self.assertNotIn("beta University</th>", page)
+
+    def test_reset_url_has_no_query_parameters(self):
+        page = self.client.get("/explorer?state=CA").get_data(as_text=True)
+        self.assertIn('href="/explorer">Reset Filters</a>', page)
+        reset_page = self.client.get("/explorer").get_data(as_text=True)
+        self.assertIn("Matching records: 4", reset_page)
+        self.assertIn('<form method="get" action="/explorer">', reset_page)
+        self.assertIn('<form method="post" action="/explorer">', reset_page)
+
+    def test_dollar_percentage_and_enrollment_formatting(self):
+        self.records[0]["student_size"] = 12345
+        self.records[0]["tuition_out_of_state"] = 45678
+        page = self.client.get("/explorer").get_data(as_text=True)
+        for value in ("$1,000", "$45,678", "$30,000", "50.0%", "12,345", "$0", "Not available"):
+            self.assertIn(value, page)
+
+    def test_invalid_values_are_shown_without_crashing(self):
+        query = {"maximum_tuition": "-5", "minimum_graduation": "101", "state": "ZZ",
+                 "institution_type": "Unknown", "sort": "random", "limit": "999"}
+        response = self.client.get("/explorer", query_string=query)
+        self.assertEqual(response.status_code, 200)
+        page = response.get_data(as_text=True)
+        for message in ("non-negative number", "0 to 100", "selected state", "selected institution type", "Unknown sort", "Unknown results limit"):
+            self.assertIn(message, page)
+        self.assertIn('value="-5"', page)
+        self.assertIn("Matching records: 4", page)
+
+    def test_no_matches_message(self):
+        page = self.client.get("/explorer?name=nonexistent").get_data(as_text=True)
+        self.assertIn("No colleges match these filters", page)
+        self.assertIn("Matching records: 0", page)
+
+    def test_unknown_query_values_are_escaped(self):
+        page = self.client.get("/explorer", query_string={"state": "<script>"}).get_data(as_text=True)
+        self.assertIn("&lt;script&gt;", page)
+        self.assertNotIn("<script>", page)
+
+    def test_route_sorts_then_limits_and_counts_all_matches(self):
+        self.records.extend(dict(self.records[0], school_id=number, name=f"Extra {number}") for number in range(5, 20))
+        page = self.client.get("/explorer?sort=tuition_desc&limit=10").get_data(as_text=True)
+        self.assertIn("Loaded records: 19", page)
+        self.assertIn("Matching records: 19", page)
+        self.assertIn("Displayed results: 10", page)
+        self.assertLess(page.index("beta University</th>"), page.index("Alpha College</th>"))
+
+
 if __name__ == "__main__":
     unittest.main()
