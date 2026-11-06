@@ -1,0 +1,22 @@
+{
+  "fixture_note": "Synthetic test data only; these are not real institutions.",
+  "metadata": {"total": 2, "page": 0, "per_page": 100},
+  "results": [
+    {
+      "id": 1, "school.name": "Test Public College", "school.city": "Test City",
+      "school.state": "CA", "school.ownership": 1, "latest.student.size": 1200,
+      "latest.cost.tuition.in_state": 5000, "latest.cost.tuition.out_of_state": 14000,
+      "latest.completion.completion_rate_4yr_150nt": 0.65,
+      "latest.completion.completion_rate_less_than_4yr_150nt": null,
+      "latest.earnings.10_yrs_after_entry.median": 51000
+    },
+    {
+      "id": 2, "school.name": "Test Private College", "school.city": null,
+      "school.state": "NY", "school.ownership": 2, "latest.student.size": null,
+      "latest.cost.tuition.in_state": null, "latest.cost.tuition.out_of_state": null,
+      "latest.completion.completion_rate_4yr_150nt": null,
+      "latest.completion.completion_rate_less_than_4yr_150nt": 0.4,
+      "latest.earnings.10_yrs_after_entry.median": "PrivacySuppressed"
+    }
+  ]
+}
