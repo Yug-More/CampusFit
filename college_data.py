@@ -48,7 +48,7 @@ def fetch_college_records():
         parameters = {
             "fields": ",".join(REQUESTED_FIELDS),
             "school.operating": 1,
-            "sort": "id:asc",
+            "sort": "latest.student.size:desc",
             "page": page,
             "per_page": PAGE_SIZE,
         }
@@ -205,7 +205,7 @@ def create_metadata(record_count):
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "record_count": record_count,
         "requested_fields": REQUESTED_FIELDS,
-        "scope_or_limit": f"Operating institutions; id ascending; at most {MAX_PAGES} pages of {PAGE_SIZE} records.",
+        "scope_or_limit": f"Operating institutions; student size descending; at most {MAX_PAGES} pages of {PAGE_SIZE} records. Limited to large institutions, not a complete national dataset.",
     }
 
 

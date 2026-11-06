@@ -61,7 +61,7 @@ class ExplorerDataTests(unittest.TestCase):
         page = self.client.get("/explorer").get_data(as_text=True)
         self.assertIn("Sample fallback", page)
         self.assertIn("Loaded records: 40", page)
-        self.assertIn("Alabama", page)
+        self.assertIn("Amridge University", page)
         self.assertIn("Not available", page)
         self.assertIn('method="post"', page)
         self.assertIn("Refresh Data", page)

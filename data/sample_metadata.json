@@ -1,7 +1,7 @@
 {
   "source": "U.S. Department of Education College Scorecard",
   "endpoint": "https://api.data.gov/ed/collegescorecard/v1/schools",
-  "retrieved_at": "2026-11-06T00:05:24.557277+00:00",
+  "retrieved_at": "2026-11-06T00:33:21.684883+00:00",
   "record_count": 40,
   "requested_fields": [
     "id",
@@ -16,5 +16,5 @@
     "latest.completion.completion_rate_4yr_150nt",
     "latest.completion.completion_rate_less_than_4yr_150nt"
   ],
-  "scope_or_limit": "Official sample: 30 operating institutions by ascending ID, plus 10 operating California institutions by ascending ID; two DEMO_KEY requests, 40 records total."
+  "scope_or_limit": "Official sample: 30 largest operating institutions nationwide by latest.student.size descending, plus first 10 operating private nonprofit/for-profit institutions by ID; two DEMO_KEY requests, 40 records across 16 states. Not a representative national dataset."
 }

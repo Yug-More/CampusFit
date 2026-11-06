@@ -35,7 +35,7 @@ class RetrievalTests(unittest.TestCase):
         self.assertEqual(args, (data.ENDPOINT,))
         self.assertEqual(kwargs["params"], {
             "fields": ",".join(data.REQUESTED_FIELDS), "school.operating": 1,
-            "sort": "id:asc", "page": 0, "per_page": 100,
+            "sort": "latest.student.size:desc", "page": 0, "per_page": 100,
         })
         self.assertEqual(kwargs["headers"], {"X-Api-Key": "test-only-placeholder"})
         self.assertEqual(kwargs["timeout"], 20)
