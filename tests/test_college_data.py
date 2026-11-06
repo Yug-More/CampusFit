@@ -290,3 +290,61 @@ class StorageTests(unittest.TestCase):
         successful, message = data.refresh_college_data(self.directory)
         self.assertFalse(successful)
         self.assertNotIn("private path", message)
+
+
+class DataContractTests(unittest.TestCase):
+    def test_default_loader_does_not_depend_on_working_directory(self):
+        original_directory = Path.cwd()
+        with tempfile.TemporaryDirectory() as directory:
+            try:
+                os.chdir(directory)
+                with patch.dict(os.environ, {}, clear=True):
+                    records, metadata, source, message = data.get_available_college_data()
+            finally:
+                os.chdir(original_directory)
+        self.assertTrue(records)
+        self.assertEqual(set(records[0]), set(data.COLUMNS))
+        self.assertIn(source, ("Runtime cache", "Sample fallback"))
+
+    def test_loader_accepts_string_and_path_directory_with_spaces_and_unicode(self):
+        records = data.normalize_college_records(fixture_payload()["results"])
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory) / "test data" / "données"
+            data.save_college_records(records, folder / "sample_colleges.csv")
+            data.save_metadata(data.create_metadata(len(records)), folder / "sample_metadata.json")
+            for argument in (folder, str(folder)):
+                with self.subTest(argument_type=type(argument).__name__):
+                    loaded, metadata, source, message = data.get_available_college_data(argument)
+                    self.assertEqual(loaded, records)
+                    self.assertEqual(source, "Sample fallback")
+
+    def test_mismatched_metadata_keeps_records_but_hides_retrieval_details(self):
+        records = data.normalize_college_records(fixture_payload()["results"])
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            data.save_college_records(records, folder / "colleges.csv")
+            data.save_metadata(data.create_metadata(99), folder / "metadata.json")
+            loaded, metadata, source, message = data.get_available_college_data(folder)
+        self.assertEqual(loaded, records)
+        self.assertEqual(metadata, {})
+        self.assertEqual(source, "Runtime cache")
+        self.assertIn("Retrieval details are unavailable", message)
+
+    @patch("college_data.requests.get")
+    @patch.dict(os.environ, {"COLLEGE_SCORECARD_API_KEY": "test-only-placeholder"})
+    def test_later_page_failure_does_not_publish_partial_download(self, get):
+        records = data.normalize_college_records(fixture_payload()["results"])
+        get.side_effect = [
+            api_response({"results": fixture_payload()["results"] * 50}),
+            requests.Timeout("private details"),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            data.publish_runtime_cache(records, data.create_metadata(len(records)), folder)
+            original = {name: (folder / name).read_bytes() for name in ("colleges.csv", "metadata.json")}
+            successful, message = data.refresh_college_data(folder)
+            self.assertFalse(successful)
+            self.assertEqual(get.call_count, 2)
+            for name, content in original.items():
+                self.assertEqual((folder / name).read_bytes(), content)
+            self.assertNotIn("private details", message)

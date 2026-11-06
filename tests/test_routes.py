@@ -96,6 +96,42 @@ class ExplorerDataTests(unittest.TestCase):
         self.assertIn("Sample fallback", page)
         self.assertNotIn("private details", page)
 
+    def test_failed_refresh_keeps_runtime_cache_and_metadata_visible(self):
+        records = data.load_college_records(self.path / "sample_colleges.csv")[:1]
+        metadata = data.create_metadata(1)
+        data.publish_runtime_cache(records, metadata, self.path)
+        original = {name: (self.path / name).read_bytes() for name in ("colleges.csv", "metadata.json")}
+        with patch.dict(os.environ, {"COLLEGE_SCORECARD_API_KEY": "test-only-placeholder"}):
+            with patch("college_data.requests.get", side_effect=requests.ConnectionError("private details")):
+                response = self.client.post("/explorer")
+        page = response.get_data(as_text=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Runtime cache", page)
+        self.assertIn(records[0]["name"], page)
+        self.assertIn(metadata["retrieved_at"], page)
+        self.assertNotIn("private details", page)
+        for name, content in original.items():
+            self.assertEqual((self.path / name).read_bytes(), content)
+
+    def test_metadata_display_and_unavailable_timestamp(self):
+        metadata = data.load_metadata(self.path / "sample_metadata.json")
+        page = self.client.get("/explorer").get_data(as_text=True)
+        self.assertIn("Retrieved (UTC): " + metadata["retrieved_at"], page)
+        (self.path / "sample_metadata.json").unlink()
+        page = self.client.get("/explorer").get_data(as_text=True)
+        self.assertIn("Retrieved (UTC): Not available", page)
+        self.assertIn("Retrieval details are unavailable", page)
+        self.assertIn("Loaded records: 40", page)
+
+    def test_explorer_handles_no_usable_local_dataset(self):
+        (self.path / "sample_colleges.csv").unlink()
+        response = self.client.get("/explorer")
+        self.assertEqual(response.status_code, 200)
+        page = response.get_data(as_text=True)
+        self.assertIn("No college records are available", page)
+        self.assertIn("Loaded records: 0", page)
+        self.assertIn("Unavailable", page)
+
     def test_html_is_escaped_and_zero_is_displayed(self):
         records = data.load_college_records(self.path / "sample_colleges.csv")[:1]
         records[0]["name"] = "<script>test</script>"
