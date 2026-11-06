@@ -53,3 +53,145 @@ The following technologies are planned for the project:
 - **Matplotlib:** Data visualization
 - **CSV / JSON:** Local data storage
 - **College Scorecard API:** Publicly available college information
+
+## Current implementation status
+
+Yug's College Explorer now loads local College Scorecard records and provides a
+POST-based **Refresh Data** action. Retrieval, normalization, CSV/JSON storage,
+sample fallback, and basic results display are implemented. Filters remain a
+future milestone. Sean's Decision Simulator is still a temporary placeholder;
+analysis, scoring, and visualization remain reserved for Sean.
+
+### Setup and run
+
+Use Python 3.10 or newer (tested with Python 3.13.2).
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python app.py
+```
+
+On Windows, activate with `.venv\Scripts\activate` instead. Open
+<http://127.0.0.1:5000/explorer>. No API key is needed to view the committed sample.
+The only direct dependencies are Flask and requests.
+
+To enable refresh, obtain a private key through the
+[official College Scorecard documentation](https://collegescorecard.ed.gov/data/api-documentation/).
+Set it in your terminal before starting Flask:
+
+```bash
+export COLLEGE_SCORECARD_API_KEY="YOUR_PRIVATE_KEY"
+```
+
+In PowerShell, use `$env:COLLEGE_SCORECARD_API_KEY="YOUR_PRIVATE_KEY"`.
+Do not commit a key or environment file. The application reads the environment
+with `os.environ.get`; it does not automatically read `.env` files. Requests send
+the key in the `X-Api-Key` header, never in stored URLs or metadata.
+
+Run all deterministic tests without live API requests:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+### Files and local data contract
+
+- `app.py`: Flask routes and data-to-template connection.
+- `college_data.py`: retrieval, cleaning, validation, storage, loading, and refresh.
+- `templates/` and `static/css/`: shared layout, Explorer, simulator placeholder, and styling.
+- `data/sample_colleges.csv` and `data/sample_metadata.json`: committed official sample.
+- `data/colleges.csv` and `data/metadata.json`: generated runtime files, ignored by Git.
+- `tests/`: unittest tests and a small, explicitly synthetic JSON fixture.
+
+CSV files use UTF-8 and a header with exactly these columns, in this order:
+
+```text
+school_id,name,city,state,institution_type,student_size,tuition_in_state,tuition_out_of_state,graduation_rate,median_earnings
+```
+
+`load_college_records(path)` returns a list of dictionaries: IDs, enrollment,
+tuition, and earnings are integers; graduation rates are fractions from 0 to 1;
+missing numbers are `None`; text values are strings. This is Sean's integration
+point for later analysis. No scoring or analysis is performed by the data loader.
+
+Metadata contains `source`, `endpoint`, `retrieved_at` (ISO 8601 UTC),
+`record_count`, `requested_fields`, and `scope_or_limit`. Retrieval time describes
+when CampusFit obtained the snapshot, not the year each measure was collected.
+
+### Official source and verified fields
+
+Verified on November 5, 2026 using the official
+[API documentation](https://collegescorecard.ed.gov/data/api-documentation/),
+[data dictionary](https://collegescorecard.ed.gov/files/CollegeScorecardDataDictionary.xlsx)
+(`Institution_Data_Dictionary` and `Most_Recent_Inst_Cohort_Map`), and
+[institution technical documentation](https://collegescorecard.ed.gov/files/InstitutionDataDocumentation.pdf).
+The endpoint is `https://api.data.gov/ed/collegescorecard/v1/schools`.
+
+API-to-CSV mappings:
+
+- `id` → `school_id`: IPEDS institution identifier (UNITID).
+- `school.name` → `name`; `school.city` → `city`; `school.state` → `state`.
+- `school.ownership` → `institution_type`: 1 = Public, 2 = Private nonprofit,
+  3 = Private for-profit. Unknown ownership remains missing.
+- `latest.student.size` → `student_size`: undergraduate certificate/degree-seeking enrollment.
+- `latest.cost.tuition.in_state` → `tuition_in_state`: in-state tuition and fees in dollars.
+- `latest.cost.tuition.out_of_state` → `tuition_out_of_state`: out-of-state tuition and fees in dollars.
+- `latest.completion.completion_rate_4yr_150nt` or
+  `latest.completion.completion_rate_less_than_4yr_150nt` → `graduation_rate`:
+  first-time, full-time degree/certificate-seeking students completing at the
+  institution within 150% of normal time. Use the four-year value when available,
+  otherwise the less-than-four-year value; do not average them.
+- `latest.earnings.10_yrs_after_entry.median` → `median_earnings`: median annual
+  earnings of working, non-enrolled students ten years after entry. Earnings
+  cover undergraduate Title IV federal-aid recipients, not all students or only graduates.
+
+The dictionary's most-recent map identifies completion cohorts as fall 2019 /
+academic year 2019–20 for four-year institutions and fall 2022 / academic year
+2022–23 for shorter institutions, reported in IPEDS 2025–26. The earnings measure
+pools 2011–12 and 2012–13 entry cohorts, measured in calendar years 2022 and 2023,
+inflation-adjusted to 2024 dollars. These are verification-time definitions;
+`latest` can change with later releases and mixes reporting years across metrics.
+
+### Scope, sample, and refresh behavior
+
+A refresh requests only the 11 mapped source fields, filters `school.operating=1`,
+and sorts `id:asc`. Pagination starts at page 0 with `per_page=100`; it stops after
+three pages (at most 300 records), a short/empty page, or the reported total.
+Each request has a 20-second timeout. This deliberately limited subset is biased
+by institution ID and is not representative of all U.S. colleges. The Explorer
+currently displays only the first 20 loaded records.
+
+The committed sample contains 40 real official API records: the first 30 operating
+institutions by ID, plus the first 10 operating California institutions by ID.
+It includes Alabama and California, all three ownership types, different costs
+and outcomes, and genuinely missing measures. Two small requests used the public
+`DEMO_KEY`, permitted for initial exploration by the
+[api.data.gov developer manual](https://api.data.gov/docs/developer-manual/)
+(30 requests/hour and 50/day per IP). This key is never an application default.
+The snapshot was retrieved November 5, 2026 Pacific time; its UTC metadata timestamp
+is `2026-11-06T00:05:24.557277+00:00`.
+
+Missing, suppressed, nonnumeric, nonfinite, or out-of-range numerical values become
+`None`, are written as blank CSV cells, and display as **Not available**. Missing
+text becomes an empty string. Genuine zeroes remain zeroes. Records without a
+positive institution ID or name are skipped; duplicate IDs retain the first valid
+record. Invalid saved CSV files are rejected rather than silently trusted.
+
+The loader prefers usable runtime CSV data, then the committed sample. Missing or
+invalid metadata does not discard otherwise usable records; retrieval details are
+shown as unavailable. With no API key, local data remains usable and refresh
+explains how to configure a key.
+
+Refresh downloads and validates records before preparing both runtime files.
+Writes use temporary files and replacement; a caught publication failure restores
+previous files. Timeouts, connection/HTTP failures (including rate limits), invalid
+JSON, unexpected structures, and unusable/empty results leave the old cache intact.
+A successful POST redirects back to the Explorer; failed refreshes show a safe
+message alongside available local data. Error messages omit raw request details.
+
+This is a local class-project workflow: simultaneous refreshes and interruption
+between the two file replacements are not coordinated as a database transaction.
+Use one local application process. Search, filters, sorting, adjustable display
+limits, and Sean's analysis/visualizations remain future work.
