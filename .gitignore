@@ -223,3 +223,11 @@ __marimo__/
 # Local College Scorecard downloads; the small official sample stays committed.
 /data/colleges.csv
 /data/metadata.json
+
+# Editor temporary files and platform clutter.
+*.tmp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
