@@ -1,316 +1,421 @@
-
 # CampusFit
 
-**San José State University | CS 122 — Advanced Programming with Python**
+A Flask application for exploring colleges and developing preference-based comparisons using official College Scorecard data.
 
-**Authors:** Yug Amol More and Sean Aminov
+**San José State University · CS 122 — Advanced Programming with Python**
 
-## Project Overview
+**Project partners:** Yug Amol More and Sean Aminov
 
-CampusFit is a Python-based web application designed to help students explore and compare colleges based on their personal preferences and goals. The application will use publicly available data from the U.S. Department of Education's College Scorecard to provide information about tuition costs, graduation rates, locations, and student outcomes. Students will be able to search for colleges, filter their options, and compare institutions using different criteria. One of the main features will be a What-If Decision Simulator, which allows users to adjust their priorities and see how their college rankings change. Our goal is to make the college selection process easier to understand by presenting useful information through organized comparisons and visualizations.
+## Project overview
 
-## Project Outline
+Students comparing colleges must consider location, tuition, graduation rates, and
+student outcomes, often across different sources and reporting years. CampusFit
+organizes public U.S. Department of Education College Scorecard information in one
+interface. The College Explorer lets students search institutions, combine filters,
+and examine available costs and outcomes.
 
-### 1. Interface Plan
+The planned Decision Simulator will let students adjust personal priorities and
+compare colleges through weighted rankings and charts. This CS 122 final project
+connects Python web-data access, local data organization, a Flask interface, and
+planned analysis and visualization. The Explorer and data workflow are complete;
+the simulator and analysis remain under development.
 
-We plan to develop the application using Python and Flask, with a web interface that allows students to interact with the collected college data.
+## Current project status
 
-The interface will include two main pages:
+| Component | Status | Owner |
+|---|---|---|
+| College Scorecard data retrieval | Complete | Yug Amol More |
+| Local CSV and metadata storage | Complete | Yug Amol More |
+| College Explorer | Complete | Yug Amol More |
+| Filtering and sorting | Complete | Yug Amol More |
+| Partner data contract | Complete | Yug Amol More |
+| Decision Simulator | In development; placeholder only | Sean Aminov |
+| Weighted college analysis | In development | Sean Aminov |
+| Data visualization | In development | Sean Aminov |
 
-- **College Explorer:** Allows users to search for colleges, apply filters, and view information about individual institutions.
-- **Decision Simulator:** Allows users to adjust factors such as affordability, graduation rates, and potential earnings to generate personalized college comparisons.
+## Features
 
-We also plan to include search fields, dropdown menus, sliders, buttons, and other interactive elements to make the application easy to navigate.
+### Completed
 
-### 2. Data Collection and Storage Plan
-**Responsible: Yug Amol More (Author #1)**
+- Official College Scorecard API retrieval, bounded to a nationally distributed
+  selection of up to 300 large operating institutions.
+- Validated local CSV records, separate JSON metadata, and preservation of the
+  last usable cache when refresh fails.
+- A genuine committed sample for demonstrations without an API key or live access.
+- College-name, state, institution-type, maximum in-state tuition, and minimum
+  graduation-rate filters that can be combined.
+- Six sort options and limits of 10, 20, 50, or all matching local records.
+- Honest missing-value display, input validation, result counts, and manual refresh.
+- Shared Flask/Jinja pages with responsive controls, a horizontally scrollable
+  results table, labeled inputs, and visible keyboard focus.
 
-- Retrieve publicly available college information using the U.S. Department of Education's College Scorecard API.
-- Collect relevant data, including institution names, locations, tuition costs, graduation rates, and available earnings information.
-- Use Python to retrieve and organize the data into a consistent structure.
-- Handle missing or incomplete values to keep the information suitable for comparisons.
-- Store the collected data locally in CSV or JSON format for use throughout the application.
-- Make the organized data accessible to the College Explorer and Decision Simulator pages.
+### In development
 
-### 3. Data Analysis and Visualization Plan
-**Responsible: Sean Aminov (Author #2)**
+Sean's assigned work includes preference-based weighted ranking, the What-If
+Decision Simulator, and college comparison charts. The simulator route currently
+shows a temporary placeholder; no ranking, analysis, or visualization is implemented.
 
-- Use Python, Pandas, and NumPy to analyze the college data collected from the College Scorecard API.
-- Compare institutions based on factors such as tuition costs, graduation rates, and available earnings information.
-- Develop a weighted scoring system that ranks colleges according to the user's selected preferences and priorities.
-- Implement a What-If Decision Simulator that recalculates college rankings when users adjust the importance of different factors.
-- Use Matplotlib to create visualizations, including bar charts and comparison graphs, to highlight differences between colleges.
-- Display the analysis results through the Flask interface to help students understand the trade-offs between affordability, academic outcomes, and potential earnings.
+## Screenshots
 
-## Technologies
+![College Explorer with filters](docs/images/college-explorer.png)
 
-The following technologies are planned for the project:
+*College Explorer with filters, data-source status, and the committed official sample.*
 
-- **Python:** Data collection, processing, and application logic
-- **Flask:** Web application and user interface
-- **Pandas:** Data organization and manipulation
-- **NumPy:** Numerical calculations and data analysis
-- **Matplotlib:** Data visualization
-- **CSV / JSON:** Local data storage
-- **College Scorecard API:** Publicly available college information
+## Technology stack
 
-## Current implementation status
+| Technology | Current use |
+|---|---|
+| Python 3.10+ | Data workflow, validation, filtering, and application logic |
+| Flask and Jinja | Routes, shared templates, and server-rendered pages |
+| Requests | HTTP retrieval from the official API |
+| HTML and CSS | Forms, results, navigation, and responsive layout |
+| CSV and JSON | Local college records, metadata, and test fixtures |
+| College Scorecard API | Official institution data |
+| `unittest` and `unittest.mock` | Automated tests without live API calls |
 
-Yug's College Explorer now loads local College Scorecard records and provides a
-POST-based **Refresh Data** action. Retrieval, normalization, CSV/JSON storage,
-sample fallback, College Explorer filters, sorting, and result limits are
-implemented. Sean's Decision Simulator is still a temporary placeholder;
-analysis, scoring, and visualization remain reserved for Sean.
+Pandas and NumPy are planned for Sean's analysis, and Matplotlib for his charts.
+They are not current application dependencies. The only direct packages in
+`requirements.txt` are Flask and requests.
 
-### Setup and run
+## Project structure
 
-Use Python 3.10 or newer (tested with Python 3.13.2).
+```text
+CampusFit/
+├── app.py
+├── college_data.py
+├── college_filters.py
+├── requirements.txt
+├── README.md
+├── LICENSE
+├── .gitignore
+├── data/
+│   ├── sample_colleges.csv
+│   └── sample_metadata.json
+├── docs/
+│   ├── data_contract.md
+│   └── images/
+│       └── college-explorer.png
+├── templates/
+│   ├── base.html
+│   ├── explorer.html
+│   └── simulator_placeholder.html
+├── static/
+│   └── css/
+│       └── style.css
+└── tests/
+    ├── fixtures/
+    │   └── scorecard_sample.json
+    ├── test_college_data.py
+    ├── test_college_filters.py
+    └── test_routes.py
+```
+
+- `app.py` handles Flask requests and passes data to templates.
+- `college_data.py` retrieves, normalizes, validates, stores, and loads records.
+- `college_filters.py` validates query values, filters, sorts, and limits results.
+- `data/` contains the committed official sample; generated runtime files stay local.
+- `docs/data_contract.md` defines Sean's supported integration interface.
+- `templates/` and `static/` provide shared page structure and styling.
+- `tests/` contains deterministic tests and an explicitly synthetic API fixture.
+
+## Setup and installation
+
+Use **Python 3.10 or newer**; verification used Python 3.13.2. The commands below
+use `python`; use your system's `python3` command if needed.
+
+### 1. Clone the implementation branch
+
+While this work is on the feature branch, clone it explicitly:
 
 ```bash
+git clone --branch feature/college-explorer-data https://github.com/Yug-More/CampusFit.git
+cd CampusFit
 python -m venv .venv
+```
+
+### 2. Activate the virtual environment
+
+macOS/Linux:
+
+```bash
 source .venv/bin/activate
+```
+
+Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Windows Command Prompt:
+
+```bat
+.venv\Scripts\activate.bat
+```
+
+### 3. Install dependencies
+
+```bash
 python -m pip install -r requirements.txt
+```
+
+### 4. Optionally configure live refresh
+
+**An API key is optional for viewing local data and required for live refresh.**
+Obtain a private key through the [official API documentation](https://collegescorecard.ed.gov/data/api-documentation/).
+Set it in the terminal before starting Flask.
+
+macOS/Linux:
+
+```bash
+export COLLEGE_SCORECARD_API_KEY="your_api_key_here"
+```
+
+Windows PowerShell:
+
+```powershell
+$env:COLLEGE_SCORECARD_API_KEY="your_api_key_here"
+```
+
+Windows Command Prompt:
+
+```bat
+set COLLEGE_SCORECARD_API_KEY=your_api_key_here
+```
+
+Never commit a key or environment file. The application reads this variable with
+`os.environ.get`; it does not automatically read `.env` files. Requests send the
+key in the `X-Api-Key` header, and local data files never contain it.
+
+### 5. Start the application
+
+```bash
 python app.py
 ```
 
-On Windows, activate with `.venv\Scripts\activate` instead. Open
-<http://127.0.0.1:5000/explorer>. No API key is needed to view the committed sample.
-The only direct dependencies are Flask and requests.
+Open [College Explorer](http://127.0.0.1:5000/explorer). The home route redirects
+there; `/simulator` displays Sean's placeholder. Debug mode is disabled.
 
-To enable refresh, obtain a private key through the
-[official College Scorecard documentation](https://collegescorecard.ed.gov/data/api-documentation/).
-Set it in your terminal before starting Flask:
+## Using CampusFit
 
-```bash
-export COLLEGE_SCORECARD_API_KEY="YOUR_PRIVATE_KEY"
-```
+The Explorer has **10 functional widgets**: seven input/select controls and the
+Apply Filters, Reset Filters, and Refresh Data buttons. Navigation links, static
+text, and result tables are not included in that count.
 
-In PowerShell, use `$env:COLLEGE_SCORECARD_API_KEY="YOUR_PRIVATE_KEY"`.
-Do not commit a key or environment file. The application reads the environment
-with `os.environ.get`; it does not automatically read `.env` files. Requests send
-the key in the `X-Api-Key` header, never in stored URLs or metadata.
+| Control | Behavior |
+|---|---|
+| College name | Case-insensitive partial matching; surrounding spaces are ignored |
+| State | All states or a state present in the loaded data; options are alphabetical |
+| Institution type | All types or one ownership type present in the loaded data |
+| Maximum in-state tuition | Non-negative dollar amount, including fees; matches values at or below it |
+| Minimum graduation rate (%) | A percentage from 0–100; matches rates at or above it |
+| Sort results | Name A–Z; in-state tuition low–high or high–low; graduation rate, median earnings, or student size high–low |
+| Results limit | 10, 20 (default), 50, or All matching local records |
+| Apply Filters | Submits a GET form and preserves selections in the URL and form |
+| Reset Filters | Submits an empty GET form to `/explorer`; restores name sorting and the 20-result limit |
+| Refresh Data | Submits a separate POST request; saves validated data and redirects to the default Explorer on success |
 
-Run all deterministic tests without live API requests:
+Filters combine, then sorting and the display limit apply. The page reports loaded,
+matching, and displayed counts, plus data source and UTC retrieval time. Filtering
+never calls the API and does not change saved records.
 
-```bash
-python -m unittest discover -s tests -v
-```
+The tuition filter uses **in-state tuition only**, never a combination with
+out-of-state tuition. Active tuition and graduation filters exclude unavailable
+values, even when their threshold is zero. Graduation input is converted from a
+percentage to a fraction: 60 is compared with 0.60. Numeric sorts put missing values
+last in either direction, using college name to break ties.
 
-### Files and local data contract
+Invalid numeric filters are ignored with a message. Unknown state/type selections
+are ignored; unknown sort/limit values fall back to name/20. Other valid filters
+still apply. Empty matches show guidance. Reset clears filters without erasing data.
+If refresh has no key or fails, the page explains the problem and continues using
+available local data without exposing raw request details.
 
-- `app.py`: Flask routes and data-to-template connection.
-- `college_data.py`: retrieval, cleaning, validation, storage, loading, and refresh.
-- `college_filters.py`: query validation, filtering, sorting, and result limiting.
-- `templates/` and `static/css/`: shared layout, Explorer, simulator placeholder, and styling.
-- `data/sample_colleges.csv` and `data/sample_metadata.json`: committed official sample.
-- `data/colleges.csv` and `data/metadata.json`: generated runtime files, ignored by Git.
-- `tests/`: unittest tests and a small, explicitly synthetic JSON fixture.
-- `docs/data_contract.md`: the supported loader contract and integration example.
+Example reproducible URL:
 
-CSV files use UTF-8 and a header with exactly these columns, in this order:
+[Arizona public institutions with tuition and graduation filters](http://127.0.0.1:5000/explorer?name=Arizona&state=AZ&institution_type=Public&maximum_tuition=13000&minimum_graduation=60&sort=tuition_asc&limit=10)
+
+### Short demonstration
+
+1. Open College Explorer and identify the official College Scorecard source.
+2. Show the current data source, retrieval time, and loaded count.
+3. Search for `Arizona`.
+4. Combine State `AZ` and Institution type `Public`.
+5. Change the sorting method and result limit.
+6. Use Reset Filters to restore the default view.
+7. Explain the sample fallback and use Refresh Data: without a key it shows setup
+   guidance; with a key it requests the bounded official subset.
+
+<a id="official-source-and-verified-fields"></a>
+
+## Data source and field definitions
+
+Data comes from the **U.S. Department of Education College Scorecard**:
+
+- [Official API documentation](https://collegescorecard.ed.gov/data/api-documentation/)
+- [Official data dictionary](https://collegescorecard.ed.gov/files/CollegeScorecardDataDictionary.xlsx)
+- [Institution-level technical documentation](https://collegescorecard.ed.gov/files/InstitutionDataDocumentation.pdf)
+
+The schools endpoint is `https://api.data.gov/ed/collegescorecard/v1/schools`.
+Fields and cohort definitions were verified on November 5, 2026.
+
+| Information | Normalized column | Meaning |
+|---|---|---|
+| Institution ID and name | `school_id`, `name` | IPEDS UNITID and institution name |
+| Location | `city`, `state` | City and state abbreviation |
+| Institution type | `institution_type` | Public, Private nonprofit, or Private for-profit |
+| Student size | `student_size` | Undergraduate certificate/degree-seeking enrollment |
+| In-state tuition | `tuition_in_state` | In-state tuition and fees in dollars |
+| Out-of-state tuition | `tuition_out_of_state` | Out-of-state tuition and fees in dollars |
+| Graduation rate | `graduation_rate` | Applicable first-time, full-time completion rate within 150% of normal time |
+| Median earnings | `median_earnings` | Annual earnings of working, non-enrolled federal-aid recipients ten years after entry |
+
+Tuition is not net price or total living cost. Graduation uses the four-year
+150%-time measure when available, otherwise the less-than-four-year measure; they
+are not averaged. Earnings cover undergraduate Title IV aid recipients, not all
+students or only graduates, and do not predict an individual's salary.
+
+At verification, the most-recent dictionary mapped completion to fall 2019 /
+2019–20 entry cohorts for four-year institutions and fall 2022 / 2022–23 for shorter
+institutions, reported in IPEDS 2025–26. Earnings pooled 2011–12 and 2012–13 entry
+cohorts, measured in 2022 and 2023 and adjusted to 2024 dollars. The `latest` fields
+can mix reporting years and change with new releases.
+
+Missing, suppressed, invalid, nonfinite, or out-of-range numerical values remain
+missing (`None` in Python, blank in CSV). Missing text becomes an empty string.
+The interface displays **Not available**; genuine zeroes stay zeroes. Money uses
+dollar signs and commas, enrollment uses commas, and graduation rates use
+percentages without altering stored values. See the [data contract](docs/data_contract.md)
+for exact API mappings, Python types, and validation rules.
+
+## Data workflow
+
+1. Request only the 11 required source fields for currently operating institutions.
+2. Normalize ownership labels, text, and numerical measures.
+3. Validate records, skip missing IDs/names, and retain the first valid record per ID.
+4. Prepare validated CSV data and separate JSON metadata before publishing them.
+5. Preserve the last valid cache after network, response, validation, or ordinary write failures.
+6. Use the committed official sample when no usable runtime CSV exists.
+7. Load typed records for Flask, then apply local filters, sorting, and display limits.
+
+Live retrieval uses `school.operating=1` and the documented
+`sort=latest.student.size:desc`. It starts at page 0, requests 100 records per page,
+and stops at three pages (**at most 300 institutions**), a short/empty page, or the
+reported total. Each request has a 20-second timeout. This selects large operating
+institutions across the country, including online institutions; it is not a census.
+
+Runtime files are `data/colleges.csv` and `data/metadata.json`, both ignored by Git.
+Fallback files are [sample_colleges.csv](data/sample_colleges.csv) and
+[sample_metadata.json](data/sample_metadata.json), both committed. A usable runtime
+CSV takes priority even without a key. Invalid/missing metadata does not discard
+usable records; retrieval details are then shown as unavailable.
+
+CSV headers, in order:
 
 ```text
 school_id,name,city,state,institution_type,student_size,tuition_in_state,tuition_out_of_state,graduation_rate,median_earnings
 ```
 
-Sean should call `get_available_college_data()` to receive
-`(records, metadata, source, message)` with runtime/sample fallback. The full
-[data contract](docs/data_contract.md) documents parameters, return types, field
-meanings, paths, and a runnable usage example. For explicitly chosen CSV files,
-`load_college_records(path)` returns just the records and does not provide fallback.
-IDs, enrollment, tuition, and earnings load as integers; graduation rates are
-fractions from 0 to 1; missing numbers are `None`; text values are strings.
-No scoring or analysis is performed by either loader.
+Metadata contains `source`, `endpoint`, `retrieved_at` (ISO 8601 UTC), `record_count`,
+`requested_fields`, and `scope_or_limit`. Retrieval time is not a measure's reporting year.
 
-Metadata contains `source`, `endpoint`, `retrieved_at` (ISO 8601 UTC),
-`record_count`, `requested_fields`, and `scope_or_limit`. Retrieval time describes
-when CampusFit obtained the snapshot, not the year each measure was collected.
+The official sample contains 40 records: the 30 largest operating institutions plus
+10 operating private institutions by ascending ID for ownership and missing-value
+variety. It covers 16 states (AL, AZ, CA, FL, GA, ID, IN, MD, MI, NH, OH, PA, TX, UT,
+VA, WV) and all three ownership types. It was retrieved November 5, 2026 Pacific time
+(`2026-11-06T00:33:21.684883+00:00` UTC), with rows stored alphabetically by name.
+Two small sample requests used the optional public exploratory `DEMO_KEY`, permitted
+by the [api.data.gov developer manual](https://api.data.gov/docs/developer-manual/)
+within its 30/hour and 50/day per-IP limits. It is never an application default.
 
-### Official source and verified fields
+## Testing
 
-Verified on November 5, 2026 using the official
-[API documentation](https://collegescorecard.ed.gov/data/api-documentation/),
-[data dictionary](https://collegescorecard.ed.gov/files/CollegeScorecardDataDictionary.xlsx)
-(`Institution_Data_Dictionary` and `Most_Recent_Inst_Cohort_Map`), and
-[institution technical documentation](https://collegescorecard.ed.gov/files/InstitutionDataDocumentation.pdf).
-The endpoint is `https://api.data.gov/ed/collegescorecard/v1/schools`.
+From the repository root with dependencies installed:
 
-API-to-CSV mappings:
+```bash
+python -m unittest discover -s tests -v
+```
 
-- `id` → `school_id`: IPEDS institution identifier (UNITID).
-- `school.name` → `name`; `school.city` → `city`; `school.state` → `state`.
-- `school.ownership` → `institution_type`: 1 = Public, 2 = Private nonprofit,
-  3 = Private for-profit. Unknown ownership remains missing.
-- `latest.student.size` → `student_size`: undergraduate certificate/degree-seeking enrollment.
-- `latest.cost.tuition.in_state` → `tuition_in_state`: in-state tuition and fees in dollars.
-- `latest.cost.tuition.out_of_state` → `tuition_out_of_state`: out-of-state tuition and fees in dollars.
-- `latest.completion.completion_rate_4yr_150nt` or
-  `latest.completion.completion_rate_less_than_4yr_150nt` → `graduation_rate`:
-  first-time, full-time degree/certificate-seeking students completing at the
-  institution within 150% of normal time. Use the four-year value when available,
-  otherwise the less-than-four-year value; do not average them.
-- `latest.earnings.10_yrs_after_entry.median` → `median_earnings`: median annual
-  earnings of working, non-enrolled students ten years after entry. Earnings
-  cover undergraduate Title IV federal-aid recipients, not all students or only graduates.
+**76 tests pass.** Tests use small synthetic fixtures and mocked requests; they do
+not make live API calls. Coverage includes normalization, ownership codes, API
+responses and failures, pagination limits, CSV/metadata storage, cache preservation,
+sample fallback, portable paths, filters, sorting, limits, validation, Flask routes,
+HTML escaping, and missing-value/metadata display.
 
-The dictionary's most-recent map identifies completion cohorts as fall 2019 /
-academic year 2019–20 for four-year institutions and fall 2022 / academic year
-2022–23 for shorter institutions, reported in IPEDS 2025–26. The earnings measure
-pools 2011–12 and 2012–13 entry cohorts, measured in calendar years 2022 and 2023,
-inflation-adjusted to 2024 dollars. These are verification-time definitions;
-`latest` can change with later releases and mixes reporting years across metrics.
+A separate clean local clone and isolated virtual environment were verified with
+Python 3.13.2: dependency installation, all tests, imports, and no-key Explorer,
+simulator, and CSS responses passed. Desktop and 390-pixel layouts, keyboard focus,
+labels, table headings, and control behavior were checked manually in a browser;
+these are separate from the unit tests.
 
-### Scope, sample, and refresh behavior
+### Yug's responsibility checklist
 
-A refresh requests only the 11 mapped source fields, filters `school.operating=1`,
-and sorts `latest.student.size:desc`. This exact descending student-size syntax is
-explicitly supported in the official API documentation (Sorting section), verified
-on November 5, 2026. Pagination starts at page 0 with `per_page=100`; it stops after
-three pages (at most 300 records), a short/empty page, or the reported total.
-Each request has a 20-second timeout. This selects up to 300 of the largest
-currently operating institutions across the country by undergraduate enrollment,
-including institutions with online enrollment. It is not a complete or
-representative national dataset and favors large institutions. Filters operate
-only on loaded local data, not on the entire API.
+- [x] Official web-data access, documented fields, and bounded retrieval.
+- [x] Validated local CSV, metadata JSON, and committed sample fallback.
+- [x] College Explorer with ten functional widgets and updated results/counts.
+- [x] Honest missing-data handling and portable file paths.
+- [x] Installation, run, API-key, test, demo, and integration instructions.
+- [x] Limitations and future improvements documented; Sean's unfinished work identified.
 
-The committed sample contains 40 real official API records: the 30 largest
-operating institutions by `latest.student.size:desc`, plus the first 10 operating
-private nonprofit/for-profit institutions by ID (`school.ownership=2,3`) to
-demonstrate ownership and missing-value variety. Values are unchanged from the
-official source apart from the documented normalization; sample rows are ordered
-by college name. The sample covers 16 states (AL, AZ, CA, FL, GA, ID, IN, MD, MI,
-NH, OH, PA, TX, UT, VA, WV), all three ownership types, different costs and outcomes,
-and genuinely missing measures. Two small requests used the public
-`DEMO_KEY`, permitted for initial exploration by the
-[api.data.gov developer manual](https://api.data.gov/docs/developer-manual/)
-(30 requests/hour and 50/day per IP). This key is never an application default.
-The snapshot was retrieved November 5, 2026 Pacific time; its UTC metadata timestamp
-is `2026-11-06T00:33:21.684883+00:00`.
+This checks Yug's supplied responsibilities, not a final course grade or completion
+of Sean's portion.
 
-Missing, suppressed, nonnumeric, nonfinite, or out-of-range numerical values become
-`None`, are written as blank CSV cells, and display as **Not available**. Missing
-text becomes an empty string. Genuine zeroes remain zeroes. Records without a
-positive institution ID or name are skipped; duplicate IDs retain the first valid
-record. Invalid saved CSV files are rejected rather than silently trusted.
+## Partner integration
 
-The loader prefers usable runtime CSV data, then the committed sample. Missing or
-invalid metadata does not discard otherwise usable records; retrieval details are
-shown as unavailable. With no API key, local data remains usable and refresh
-explains how to configure a key.
+Sean should consume normalized records through the existing loader rather than
+repeat API retrieval or CSV parsing:
 
-Refresh downloads and validates records before preparing both runtime files.
-Writes use temporary files and replacement; a caught publication failure restores
-previous files. Timeouts, connection/HTTP failures (including rate limits), invalid
-JSON, unexpected structures, and unusable/empty results leave the old cache intact.
-A successful POST redirects back to the Explorer; failed refreshes show a safe
-message alongside available local data. Error messages omit raw request details.
+```python
+from college_data import get_available_college_data
 
-This is a local class-project workflow: simultaneous refreshes and interruption
-between the two file replacements are not coordinated as a database transaction.
-Use one local application process. Sean's analysis, scoring, simulator, and
-visualizations remain reserved for Sean and are not implemented by this work.
+records, metadata, source, message = get_available_college_data()
+```
 
-### College Explorer controls
+The loader performs local reads only and returns all records before Explorer
+filters. The [data contract](docs/data_contract.md) defines its optional directory
+parameter, exact return values, missing-data policy, types, paths, and an example.
+Sean's analysis should handle an empty list and document its own missing-data
+policy without changing the source records.
 
-The filter form uses GET, so submitted selections appear in a reproducible URL.
-Controls use only the currently loaded dataset:
+## Limitations
 
-- **College name:** partial, case-insensitive search; surrounding spaces are ignored.
-- **State:** all states or one abbreviation; choices come from the complete loaded
-  dataset and are sorted alphabetically.
-- **Institution type:** all types or one ownership type; choices come from loaded
-  records and are sorted consistently.
-- **Maximum in-state tuition:** a non-negative dollar amount, including fees.
-  Colleges at or below the amount match. This deliberately uses only in-state
-  tuition, never out-of-state tuition. Missing in-state tuition is excluded when
-  the filter is active, including when the maximum is zero.
-- **Minimum graduation rate (%):** a number from 0 through 100, converted to a
-  decimal fraction for comparison. For example, 60 means 60%, compared with 0.60.
-  Colleges at or above the rate match; missing rates are excluded when active.
-- **Sort results:** college name A–Z; in-state tuition low to high or high to low;
-  graduation rate, median earnings, or student size high to low. Numeric sorts
-  place missing values last in either direction. Equal numeric values use college
-  name as the secondary order.
-- **Results limit:** 10, 20 (default), 50, or All matching local records. Filtering
-  and sorting happen before the display limit is applied.
-- **Apply Filters:** submits the GET form and keeps submitted selections visible.
-- **Reset Filters:** a native button submits a separate empty GET form to
-  `/explorer`, clearing query parameters and restoring the default college-name
-  sort and 20-result limit; it does not erase cached data.
-- **Refresh Data:** remains a separate POST action. It downloads the documented
-  large-institution subset, then redirects to the default Explorer after success.
+- The live selection is capped at 300 institutions and favors large undergraduate
+  enrollments; filters search only the loaded subset.
+- Official records can have missing or suppressed measures, and different measures
+  may describe different populations and reporting years.
+- The local CSV workflow does not coordinate simultaneous refreshes or provide a
+  transaction across CSV and metadata after abrupt process interruption. Use one
+  local application process.
+- College comparisons support personal decisions; they do not objectively establish
+  one institution as the best for every student.
+- The Decision Simulator, weighted analysis, and comparison charts remain unfinished.
 
-Invalid numeric inputs are shown with short messages and that filter is ignored.
-Unknown states/types are ignored with a message; unknown sort/limit selections
-fall back to college name/20. Other valid filters still apply. An empty result
-shows a helpful message. Missing values display as **Not available**, money uses
-dollar signs and commas, enrollment uses commas, and graduation rates use
-percentages. Formatting does not change saved values. The page reports the loaded,
-matching, and displayed counts, along with source and retrieval time. Filters do
-not make API calls. The results table scrolls horizontally on narrow screens and
-supports keyboard focus.
+## Roadmap
 
-Example URL (after starting the local app):
+- [x] Flask application foundation
+- [x] College Scorecard data workflow
+- [x] Official sample-data fallback
+- [x] College Explorer filters and sorting
+- [x] Partner data contract
+- [ ] Weighted scoring model
+- [ ] Decision Simulator
+- [ ] Matplotlib comparisons
+- [ ] Final integration and presentation review
 
-<http://127.0.0.1:5000/explorer?name=Arizona&state=AZ&institution_type=Public&maximum_tuition=13000&minimum_graduation=60&sort=tuition_asc&limit=10>
+Later improvements could include a separately approved broader selection strategy,
+per-metric reporting-year information, and an explicit missing-data policy for
+analysis. Partner review should confirm the data contract and course rubric before
+final integration.
 
-Run the complete offline test suite with
-`python -m unittest discover -s tests -v`. It covers query validation, combined
-filters, all sort/limit options, missing values, display formatting, reset, and
-existing retrieval/refresh behavior. Broader dataset coverage and integration with
-Sean's future analysis should be reviewed separately before submission.
+## Contributors
 
+- [Yug Amol More](https://github.com/Yug-More) — College Explorer, API retrieval,
+  field selection, data cleaning/validation, local CSV/JSON workflow, filtering,
+  testing, and the handoff contract.
+- [Sean Aminov](https://github.com/SeanAminov) — Decision Simulator, Pandas/NumPy
+  analysis, weighted ranking and priority changes, and Matplotlib comparison
+  visualizations planned for display through Flask.
 
-### Yug's rubric checklist
+## License
 
-This checks the responsibility list supplied for Yug, not a claim about a final
-course grade or completion of Sean's work.
-
-- [x] Live web-data access: requests-based official Scorecard retrieval with a timeout.
-- [x] Official source and exact API fields identified above and in the data contract.
-- [x] Local organization: validated CSV records and separate metadata JSON.
-- [x] Committed official sample and runtime-to-sample fallback without a key.
-- [x] College Explorer route with functional controls and updated results/counts.
-- [x] Missing data stays missing, with honest display and active-filter behavior.
-- [x] Portable paths anchored to the module; no personal path configuration needed.
-- [x] Python requirement, installation, API-key, run, and test instructions provided.
-- [x] Dataset limitations, demo, integration contract, and future improvements documented.
-- [x] Sean's planned analysis and visualization preserved; simulator remains under development.
-
-**Functional widget count: 10.** The counted widgets are College name, State,
-Institution type, Maximum in-state tuition, Minimum graduation rate, Sort results,
-Results limit, Apply Filters, Reset Filters, and Refresh Data. These are seven
-input/select controls and three native buttons. Site navigation links, static
-text, tables, and counts are excluded.
-
-### Short demo for Yug
-
-1. Open `/explorer` using the run instructions above.
-2. Explain that the source is the official U.S. Department of Education College Scorecard.
-3. Show the current source, UTC retrieval time, and loaded-record count.
-4. Search for `Arizona` to demonstrate partial, case-insensitive matching.
-5. Combine State `AZ` and Institution type `Public`; explain that both conditions apply.
-6. Change sorting to median earnings high to low and the results limit to 10.
-7. Use Reset Filters to restore the default unfiltered view.
-8. Explain the committed sample fallback. Without a key, Refresh Data gives setup
-   guidance and retains local data; with a configured key, it downloads the bounded
-   large-institution subset. Automated refresh demonstrations use mocked responses.
-
-### Review notes and future improvements
-
-Yug's implementation uses only Flask and requests as direct dependencies, plus
-standard-library modules and unittest. No database, framework, analysis libraries,
-or simulator implementation is included. Existing course plans above describe
-future shared work, not installed dependencies or completed features.
-
-The local CSV workflow does not coordinate concurrent refreshes or guarantee a
-transaction across CSV and metadata after an abrupt process interruption. Keep
-one local application process. Missing outcomes, different reporting years, and
-the large-institution selection remain comparison limitations.
-
-Future improvements, outside this handoff, could include a separately approved
-broader data-selection strategy, explicit per-metric reporting-year information,
-and a documented missing-data policy for Sean's analysis. Sean should integrate
-through the loader rather than duplicating CSV parsing. Partner review should
-confirm that contract and the course rubric before merging; no simulator, scoring,
-or chart work was added here.
+CampusFit is licensed under the [MIT License](LICENSE).
