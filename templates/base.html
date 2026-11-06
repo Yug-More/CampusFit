@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}CampusFit{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="page-width">
+            <a class="brand" href="{{ url_for('explorer') }}">CampusFit</a>
+            <nav aria-label="Main navigation">
+                <a href="{{ url_for('explorer') }}"{% if request.endpoint == 'explorer' %} aria-current="page"{% endif %}>College Explorer</a>
+                <a href="{{ url_for('simulator') }}"{% if request.endpoint == 'simulator' %} aria-current="page"{% endif %}>Decision Simulator</a>
+            </nav>
+        </div>
+    </header>
+    <main class="page-width">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
