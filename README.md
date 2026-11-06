@@ -58,8 +58,8 @@ The following technologies are planned for the project:
 
 Yug's College Explorer now loads local College Scorecard records and provides a
 POST-based **Refresh Data** action. Retrieval, normalization, CSV/JSON storage,
-sample fallback, and basic results display are implemented. Filters remain a
-future milestone. Sean's Decision Simulator is still a temporary placeholder;
+sample fallback, College Explorer filters, sorting, and result limits are
+implemented. Sean's Decision Simulator is still a temporary placeholder;
 analysis, scoring, and visualization remain reserved for Sean.
 
 ### Setup and run
@@ -100,6 +100,7 @@ python -m unittest discover -s tests -v
 
 - `app.py`: Flask routes and data-to-template connection.
 - `college_data.py`: retrieval, cleaning, validation, storage, loading, and refresh.
+- `college_filters.py`: query validation, filtering, sorting, and result limiting.
 - `templates/` and `static/css/`: shared layout, Explorer, simulator placeholder, and styling.
 - `data/sample_colleges.csv` and `data/sample_metadata.json`: committed official sample.
 - `data/colleges.csv` and `data/metadata.json`: generated runtime files, ignored by Git.
@@ -157,21 +158,29 @@ inflation-adjusted to 2024 dollars. These are verification-time definitions;
 ### Scope, sample, and refresh behavior
 
 A refresh requests only the 11 mapped source fields, filters `school.operating=1`,
-and sorts `id:asc`. Pagination starts at page 0 with `per_page=100`; it stops after
+and sorts `latest.student.size:desc`. This exact descending student-size syntax is
+explicitly supported in the official API documentation (Sorting section), verified
+on November 5, 2026. Pagination starts at page 0 with `per_page=100`; it stops after
 three pages (at most 300 records), a short/empty page, or the reported total.
-Each request has a 20-second timeout. This deliberately limited subset is biased
-by institution ID and is not representative of all U.S. colleges. The Explorer
-currently displays only the first 20 loaded records.
+Each request has a 20-second timeout. This selects up to 300 of the largest
+currently operating institutions across the country by undergraduate enrollment,
+including institutions with online enrollment. It is not a complete or
+representative national dataset and favors large institutions. Filters operate
+only on loaded local data, not on the entire API.
 
-The committed sample contains 40 real official API records: the first 30 operating
-institutions by ID, plus the first 10 operating California institutions by ID.
-It includes Alabama and California, all three ownership types, different costs
-and outcomes, and genuinely missing measures. Two small requests used the public
+The committed sample contains 40 real official API records: the 30 largest
+operating institutions by `latest.student.size:desc`, plus the first 10 operating
+private nonprofit/for-profit institutions by ID (`school.ownership=2,3`) to
+demonstrate ownership and missing-value variety. Values are unchanged from the
+official source apart from the documented normalization; sample rows are ordered
+by college name. The sample covers 16 states (AL, AZ, CA, FL, GA, ID, IN, MD, MI,
+NH, OH, PA, TX, UT, VA, WV), all three ownership types, different costs and outcomes,
+and genuinely missing measures. Two small requests used the public
 `DEMO_KEY`, permitted for initial exploration by the
 [api.data.gov developer manual](https://api.data.gov/docs/developer-manual/)
 (30 requests/hour and 50/day per IP). This key is never an application default.
 The snapshot was retrieved November 5, 2026 Pacific time; its UTC metadata timestamp
-is `2026-11-06T00:05:24.557277+00:00`.
+is `2026-11-06T00:33:21.684883+00:00`.
 
 Missing, suppressed, nonnumeric, nonfinite, or out-of-range numerical values become
 `None`, are written as blank CSV cells, and display as **Not available**. Missing
@@ -193,5 +202,54 @@ message alongside available local data. Error messages omit raw request details.
 
 This is a local class-project workflow: simultaneous refreshes and interruption
 between the two file replacements are not coordinated as a database transaction.
-Use one local application process. Search, filters, sorting, adjustable display
-limits, and Sean's analysis/visualizations remain future work.
+Use one local application process. Sean's analysis, scoring, simulator, and
+visualizations remain reserved for Sean and are not implemented by this work.
+
+### College Explorer controls
+
+The filter form uses GET, so submitted selections appear in a reproducible URL.
+Controls use only the currently loaded dataset:
+
+- **College name:** partial, case-insensitive search; surrounding spaces are ignored.
+- **State:** all states or one abbreviation; choices come from the complete loaded
+  dataset and are sorted alphabetically.
+- **Institution type:** all types or one ownership type; choices come from loaded
+  records and are sorted consistently.
+- **Maximum in-state tuition:** a non-negative dollar amount, including fees.
+  Colleges at or below the amount match. This deliberately uses only in-state
+  tuition, never out-of-state tuition. Missing in-state tuition is excluded when
+  the filter is active, including when the maximum is zero.
+- **Minimum graduation rate (%):** a number from 0 through 100, converted to a
+  decimal fraction for comparison. For example, 60 means 60%, compared with 0.60.
+  Colleges at or above the rate match; missing rates are excluded when active.
+- **Sort results:** college name A–Z; in-state tuition low to high or high to low;
+  graduation rate, median earnings, or student size high to low. Numeric sorts
+  place missing values last in either direction. Equal numeric values use college
+  name as the secondary order.
+- **Results limit:** 10, 20 (default), 50, or All matching local records. Filtering
+  and sorting happen before the display limit is applied.
+- **Apply Filters:** submits the GET form and keeps submitted selections visible.
+- **Reset Filters:** links to `/explorer` with no query parameters and restores the
+  default college-name sort and 20-result limit; it does not erase cached data.
+- **Refresh Data:** remains a separate POST action. It downloads the documented
+  large-institution subset, then redirects to the default Explorer after success.
+
+Invalid numeric inputs are shown with short messages and that filter is ignored.
+Unknown states/types are ignored with a message; unknown sort/limit selections
+fall back to college name/20. Other valid filters still apply. An empty result
+shows a helpful message. Missing values display as **Not available**, money uses
+dollar signs and commas, enrollment uses commas, and graduation rates use
+percentages. Formatting does not change saved values. The page reports the loaded,
+matching, and displayed counts, along with source and retrieval time. Filters do
+not make API calls. The results table scrolls horizontally on narrow screens and
+supports keyboard focus.
+
+Example URL (after starting the local app):
+
+<http://127.0.0.1:5000/explorer?name=Arizona&state=AZ&institution_type=Public&maximum_tuition=13000&minimum_graduation=60&sort=tuition_asc&limit=10>
+
+Run the complete offline test suite with
+`python -m unittest discover -s tests -v`. It covers query validation, combined
+filters, all sort/limit options, missing values, display formatting, reset, and
+existing retrieval/refresh behavior. Broader dataset coverage and integration with
+Sean's future analysis should be reviewed separately before submission.
