@@ -170,10 +170,11 @@ class ExplorerFilterRouteTests(unittest.TestCase):
 
     def test_reset_url_has_no_query_parameters(self):
         page = self.client.get("/explorer?state=CA").get_data(as_text=True)
-        self.assertIn('href="/explorer">Reset Filters</a>', page)
+        self.assertIn('<form id="reset-filters" method="get" action="/explorer">', page)
+        self.assertIn('<button type="submit" class="secondary-button">Reset Filters</button>', page)
         reset_page = self.client.get("/explorer").get_data(as_text=True)
         self.assertIn("Matching records: 4", reset_page)
-        self.assertIn('<form method="get" action="/explorer">', reset_page)
+        self.assertIn('<form id="explorer-filters" method="get" action="/explorer">', reset_page)
         self.assertIn('<form method="post" action="/explorer">', reset_page)
 
     def test_dollar_percentage_and_enrollment_formatting(self):

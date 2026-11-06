@@ -22,7 +22,7 @@
         <ul>{% for message in validation_messages %}<li>{{ message }}</li>{% endfor %}</ul>
     </div>
     {% endif %}
-    <form method="get" action="{{ url_for('explorer') }}">
+    <form id="explorer-filters" method="get" action="{{ url_for('explorer') }}">
         <div class="filter-grid">
             <div class="form-field">
                 <label for="college-name">College name</label>
@@ -69,11 +69,13 @@
                 </select>
             </div>
         </div>
-        <div class="form-actions">
-            <button type="submit">Apply Filters</button>
-            <a class="button-link" href="{{ url_for('explorer') }}">Reset Filters</a>
-        </div>
     </form>
+    <div class="form-actions">
+        <button type="submit" form="explorer-filters">Apply Filters</button>
+        <form id="reset-filters" method="get" action="{{ url_for('explorer') }}">
+            <button type="submit" class="secondary-button">Reset Filters</button>
+        </form>
+    </div>
 </section>
 <section aria-labelledby="results-heading">
     <h2 id="results-heading">College results</h2>

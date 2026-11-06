@@ -112,8 +112,7 @@ select {
     margin-top: 1rem;
 }
 
-button,
-.button-link {
+button {
     display: inline-block;
     box-sizing: border-box;
     padding: 0.6rem 1rem;
@@ -127,7 +126,7 @@ button,
     cursor: pointer;
 }
 
-.button-link {
+.secondary-button {
     background: #fff;
     color: #174d80;
 }
