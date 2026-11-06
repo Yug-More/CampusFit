@@ -105,6 +105,7 @@ python -m unittest discover -s tests -v
 - `data/sample_colleges.csv` and `data/sample_metadata.json`: committed official sample.
 - `data/colleges.csv` and `data/metadata.json`: generated runtime files, ignored by Git.
 - `tests/`: unittest tests and a small, explicitly synthetic JSON fixture.
+- `docs/data_contract.md`: the supported loader contract and integration example.
 
 CSV files use UTF-8 and a header with exactly these columns, in this order:
 
@@ -112,10 +113,14 @@ CSV files use UTF-8 and a header with exactly these columns, in this order:
 school_id,name,city,state,institution_type,student_size,tuition_in_state,tuition_out_of_state,graduation_rate,median_earnings
 ```
 
-`load_college_records(path)` returns a list of dictionaries: IDs, enrollment,
-tuition, and earnings are integers; graduation rates are fractions from 0 to 1;
-missing numbers are `None`; text values are strings. This is Sean's integration
-point for later analysis. No scoring or analysis is performed by the data loader.
+Sean should call `get_available_college_data()` to receive
+`(records, metadata, source, message)` with runtime/sample fallback. The full
+[data contract](docs/data_contract.md) documents parameters, return types, field
+meanings, paths, and a runnable usage example. For explicitly chosen CSV files,
+`load_college_records(path)` returns just the records and does not provide fallback.
+IDs, enrollment, tuition, and earnings load as integers; graduation rates are
+fractions from 0 to 1; missing numbers are `None`; text values are strings.
+No scoring or analysis is performed by either loader.
 
 Metadata contains `source`, `endpoint`, `retrieved_at` (ISO 8601 UTC),
 `record_count`, `requested_fields`, and `scope_or_limit`. Retrieval time describes
@@ -229,8 +234,9 @@ Controls use only the currently loaded dataset:
 - **Results limit:** 10, 20 (default), 50, or All matching local records. Filtering
   and sorting happen before the display limit is applied.
 - **Apply Filters:** submits the GET form and keeps submitted selections visible.
-- **Reset Filters:** links to `/explorer` with no query parameters and restores the
-  default college-name sort and 20-result limit; it does not erase cached data.
+- **Reset Filters:** a native button submits a separate empty GET form to
+  `/explorer`, clearing query parameters and restoring the default college-name
+  sort and 20-result limit; it does not erase cached data.
 - **Refresh Data:** remains a separate POST action. It downloads the documented
   large-institution subset, then redirects to the default Explorer after success.
 
@@ -253,3 +259,58 @@ Run the complete offline test suite with
 filters, all sort/limit options, missing values, display formatting, reset, and
 existing retrieval/refresh behavior. Broader dataset coverage and integration with
 Sean's future analysis should be reviewed separately before submission.
+
+
+### Yug's rubric checklist
+
+This checks the responsibility list supplied for Yug, not a claim about a final
+course grade or completion of Sean's work.
+
+- [x] Live web-data access: requests-based official Scorecard retrieval with a timeout.
+- [x] Official source and exact API fields identified above and in the data contract.
+- [x] Local organization: validated CSV records and separate metadata JSON.
+- [x] Committed official sample and runtime-to-sample fallback without a key.
+- [x] College Explorer route with functional controls and updated results/counts.
+- [x] Missing data stays missing, with honest display and active-filter behavior.
+- [x] Portable paths anchored to the module; no personal path configuration needed.
+- [x] Python requirement, installation, API-key, run, and test instructions provided.
+- [x] Dataset limitations, demo, integration contract, and future improvements documented.
+- [x] Sean's planned analysis and visualization preserved; simulator remains under development.
+
+**Functional widget count: 10.** The counted widgets are College name, State,
+Institution type, Maximum in-state tuition, Minimum graduation rate, Sort results,
+Results limit, Apply Filters, Reset Filters, and Refresh Data. These are seven
+input/select controls and three native buttons. Site navigation links, static
+text, tables, and counts are excluded.
+
+### Short demo for Yug
+
+1. Open `/explorer` using the run instructions above.
+2. Explain that the source is the official U.S. Department of Education College Scorecard.
+3. Show the current source, UTC retrieval time, and loaded-record count.
+4. Search for `Arizona` to demonstrate partial, case-insensitive matching.
+5. Combine State `AZ` and Institution type `Public`; explain that both conditions apply.
+6. Change sorting to median earnings high to low and the results limit to 10.
+7. Use Reset Filters to restore the default unfiltered view.
+8. Explain the committed sample fallback. Without a key, Refresh Data gives setup
+   guidance and retains local data; with a configured key, it downloads the bounded
+   large-institution subset. Automated refresh demonstrations use mocked responses.
+
+### Review notes and future improvements
+
+Yug's implementation uses only Flask and requests as direct dependencies, plus
+standard-library modules and unittest. No database, framework, analysis libraries,
+or simulator implementation is included. Existing course plans above describe
+future shared work, not installed dependencies or completed features.
+
+The local CSV workflow does not coordinate concurrent refreshes or guarantee a
+transaction across CSV and metadata after an abrupt process interruption. Keep
+one local application process. Missing outcomes, different reporting years, and
+the large-institution selection remain comparison limitations.
+
+Future improvements, outside this handoff, could include a separately approved
+broader data-selection strategy, explicit per-metric reporting-year information,
+and a documented missing-data policy for Sean's analysis. Sean should integrate
+through the loader rather than duplicating CSV parsing. Partner review should
+confirm that contract and the course rubric before merging; no simulator, scoring,
+or chart work was added here.
