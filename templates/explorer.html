@@ -17,13 +17,71 @@
 </section>
 <section aria-labelledby="filters-heading">
     <h2 id="filters-heading">College filters</h2>
-    <p>Search and filter options will be added here as the College Explorer is developed.</p>
+    {% if validation_messages %}
+    <div class="validation-message" role="alert">
+        <ul>{% for message in validation_messages %}<li>{{ message }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+    <form method="get" action="{{ url_for('explorer') }}">
+        <div class="filter-grid">
+            <div class="form-field">
+                <label for="college-name">College name</label>
+                <input id="college-name" name="name" type="search" value="{{ selected.name }}">
+            </div>
+            <div class="form-field">
+                <label for="state">State</label>
+                <select id="state" name="state">
+                    <option value="">All states</option>
+                    {% if selected.state and selected.state not in states %}<option value="{{ selected.state }}" selected>Unavailable: {{ selected.state }}</option>{% endif %}
+                    {% for state in states %}<option value="{{ state }}"{% if selected.state == state %} selected{% endif %}>{{ state }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="institution-type">Institution type</label>
+                <select id="institution-type" name="institution_type">
+                    <option value="">All institution types</option>
+                    {% if selected.institution_type and selected.institution_type not in institution_types %}<option value="{{ selected.institution_type }}" selected>Unavailable: {{ selected.institution_type }}</option>{% endif %}
+                    {% for institution_type in institution_types %}<option value="{{ institution_type }}"{% if selected.institution_type == institution_type %} selected{% endif %}>{{ institution_type }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="maximum-tuition">Maximum in-state tuition</label>
+                <input id="maximum-tuition" name="maximum_tuition" inputmode="decimal" value="{{ selected.maximum_tuition }}" aria-describedby="tuition-help">
+                <small id="tuition-help">Dollars, including fees. Excludes unavailable tuition when active.</small>
+            </div>
+            <div class="form-field">
+                <label for="minimum-graduation">Minimum graduation rate (%)</label>
+                <input id="minimum-graduation" name="minimum_graduation" inputmode="decimal" value="{{ selected.minimum_graduation }}" aria-describedby="graduation-help">
+                <small id="graduation-help">Enter 0–100. Excludes unavailable graduation rates when active.</small>
+            </div>
+            <div class="form-field">
+                <label for="sort">Sort results</label>
+                <select id="sort" name="sort">
+                    {% if selected.sort not in sort_options %}<option value="{{ selected.sort }}" selected>Unavailable: {{ selected.sort }}</option>{% endif %}
+                    {% for value, label in sort_options.items() %}<option value="{{ value }}"{% if selected.sort == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="limit">Results limit</label>
+                <select id="limit" name="limit">
+                    {% if selected.limit not in result_limits %}<option value="{{ selected.limit }}" selected>Unavailable: {{ selected.limit }}</option>{% endif %}
+                    {% for value, label in result_limits.items() %}<option value="{{ value }}"{% if selected.limit == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit">Apply Filters</button>
+            <a class="button-link" href="{{ url_for('explorer') }}">Reset Filters</a>
+        </div>
+    </form>
 </section>
 <section aria-labelledby="results-heading">
     <h2 id="results-heading">College results</h2>
-    <p>Showing {{ colleges|length }} of {{ record_count }} loaded records. This is a limited class-project dataset, not a national search.</p>
+    <p>Loaded records: {{ record_count }}. Matching records: {{ matching_count }}. Displayed results: {{ colleges|length }}.</p>
+    <p>Runtime refresh selects up to 300 large operating institutions from across the country. The committed sample adds a small private-institution supplement. Neither dataset includes every U.S. institution.</p>
     <p>Graduation rates describe first-time, full-time students completing within 150% of normal time. Earnings describe working, non-enrolled federal-aid recipients ten years after entry. The latest measures may come from different years.</p>
     {% if colleges %}
+    <div class="results-table" role="region" aria-label="College results table; scroll horizontally on narrow screens" tabindex="0">
     <table>
         <caption>College Scorecard institution information</caption>
         <thead>
@@ -32,7 +90,9 @@
                 <th scope="col">City</th>
                 <th scope="col">State</th>
                 <th scope="col">Type</th>
+                <th scope="col">Student size</th>
                 <th scope="col">In-state tuition and fees</th>
+                <th scope="col">Out-of-state tuition and fees</th>
                 <th scope="col">Graduation rate (150% time)</th>
                 <th scope="col">Median earnings (10 years)</th>
             </tr>
@@ -44,15 +104,22 @@
                 <td>{{ college.city or 'Not available' }}</td>
                 <td>{{ college.state or 'Not available' }}</td>
                 <td>{{ college.institution_type or 'Not available' }}</td>
+                <td>{{ '{:,}'.format(college.student_size) if college.student_size is not none else 'Not available' }}</td>
                 <td>{{ '${:,.0f}'.format(college.tuition_in_state) if college.tuition_in_state is not none else 'Not available' }}</td>
+                <td>{{ '${:,.0f}'.format(college.tuition_out_of_state) if college.tuition_out_of_state is not none else 'Not available' }}</td>
                 <td>{{ '{:.1%}'.format(college.graduation_rate) if college.graduation_rate is not none else 'Not available' }}</td>
                 <td>{{ '${:,.0f}'.format(college.median_earnings) if college.median_earnings is not none else 'Not available' }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    </div>
+    {% else %}
+    {% if record_count %}
+    <p>No colleges match these filters. Try broader filters or use Reset Filters.</p>
     {% else %}
     <p>No college records are available. Restore the committed sample files or try Refresh Data.</p>
+    {% endif %}
     {% endif %}
 </section>
 {% endblock %}
