@@ -1,5 +1,11 @@
+import csv
+from datetime import datetime, timezone
+import json
 import math
 import os
+from pathlib import Path
+import shutil
+import tempfile
 
 import requests
 
@@ -29,6 +35,7 @@ COLUMNS = [
     "tuition_in_state", "tuition_out_of_state", "graduation_rate", "median_earnings",
 ]
 OWNERSHIP_TYPES = {1: "Public", 2: "Private nonprofit", 3: "Private for-profit"}
+DATA_DIRECTORY = Path(__file__).resolve().parent / "data"
 
 
 def fetch_college_records():
@@ -135,3 +142,164 @@ def normalize_college_records(records):
     if not college_records:
         raise ValueError("No usable college records were found. Existing local data was kept.")
     return college_records
+
+
+def validate_saved_record(record):
+    """Validate the CSV contract and restore numeric types after reading."""
+    if set(record) != set(COLUMNS):
+        raise ValueError("College data has unexpected columns.")
+    validated = dict(record)
+    for column in ("name", "city", "state", "institution_type"):
+        if not isinstance(record[column], str):
+            raise ValueError("College data contains invalid text.")
+        validated[column] = clean_text(record[column])
+    for column in ("school_id", "student_size", "tuition_in_state", "tuition_out_of_state", "graduation_rate", "median_earnings"):
+        value = record[column]
+        number = clean_number(value, whole_number=column != "graduation_rate",
+                              maximum=1 if column == "graduation_rate" else None)
+        if value not in (None, "") and number is None:
+            raise ValueError("College data contains an invalid numeric value.")
+        validated[column] = number
+    if not validated["school_id"] or not validated["name"]:
+        raise ValueError("College data requires an ID and institution name.")
+    if validated["institution_type"] not in ("", *OWNERSHIP_TYPES.values()):
+        raise ValueError("College data has an unknown institution type.")
+    return validated
+
+
+def save_college_records(records, path):
+    validated = [validate_saved_record(record) for record in records]
+    if not validated or len({record["school_id"] for record in validated}) != len(validated):
+        raise ValueError("College data must contain records with unique IDs.")
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="",
+                                         dir=path.parent, delete=False) as output:
+            temporary_path = Path(output.name)
+            writer = csv.DictWriter(output, fieldnames=COLUMNS, lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(validated)
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
+def load_college_records(path):
+    with Path(path).open(encoding="utf-8", newline="") as source:
+        reader = csv.DictReader(source)
+        if reader.fieldnames != COLUMNS:
+            raise ValueError("College data has unexpected columns.")
+        records = [validate_saved_record(record) for record in reader]
+    if not records or len({record["school_id"] for record in records}) != len(records):
+        raise ValueError("College data is empty or contains duplicate IDs.")
+    return records
+
+
+def create_metadata(record_count):
+    return {
+        "source": "U.S. Department of Education College Scorecard",
+        "endpoint": ENDPOINT,
+        "retrieved_at": datetime.now(timezone.utc).isoformat(),
+        "record_count": record_count,
+        "requested_fields": REQUESTED_FIELDS,
+        "scope_or_limit": f"Operating institutions; id ascending; at most {MAX_PAGES} pages of {PAGE_SIZE} records.",
+    }
+
+
+def save_metadata(metadata, path):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                         delete=False) as output:
+            temporary_path = Path(output.name)
+            json.dump(metadata, output, indent=2)
+            output.write("\n")
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
+def load_metadata(path):
+    with Path(path).open(encoding="utf-8") as source:
+        metadata = json.load(source)
+    required = {"source", "endpoint", "retrieved_at", "record_count", "requested_fields", "scope_or_limit"}
+    if not isinstance(metadata, dict) or not required.issubset(metadata):
+        raise ValueError("Data metadata is incomplete.")
+    if not isinstance(metadata["record_count"], int) or metadata["record_count"] < 1:
+        raise ValueError("Data metadata has an invalid record count.")
+    if not isinstance(metadata["retrieved_at"], str):
+        raise ValueError("Data metadata has an invalid retrieval timestamp.")
+    datetime.fromisoformat(metadata["retrieved_at"])
+    return metadata
+
+
+def get_available_college_data(data_directory=None):
+    directory = Path(data_directory) if data_directory is not None else DATA_DIRECTORY
+    messages = []
+    for filename, metadata_name, label in (
+        ("colleges.csv", "metadata.json", "Runtime cache"),
+        ("sample_colleges.csv", "sample_metadata.json", "Sample fallback"),
+    ):
+        try:
+            records = load_college_records(directory / filename)
+        except (OSError, ValueError, csv.Error, UnicodeError):
+            continue
+        try:
+            metadata = load_metadata(directory / metadata_name)
+            if metadata["record_count"] != len(records):
+                raise ValueError("Record count does not match.")
+        except (OSError, ValueError, UnicodeError):
+            metadata = {}
+            messages.append("Retrieval details are unavailable for this local dataset.")
+        if label == "Sample fallback":
+            messages.append("Using the committed sample because no usable runtime cache was found.")
+        if not os.environ.get("COLLEGE_SCORECARD_API_KEY", "").strip():
+            messages.append("No API key is configured. Local data remains available; set COLLEGE_SCORECARD_API_KEY to refresh.")
+        return records, metadata, label, " ".join(messages)
+    return [], {}, "Unavailable", "No usable local college data was found. Restore the sample files or refresh with an API key."
+
+
+def publish_runtime_cache(records, metadata, directory):
+    """Prepare both files first and restore previous files on a write failure."""
+    directory.mkdir(parents=True, exist_ok=True)
+    filenames = ("colleges.csv", "metadata.json")
+    with tempfile.TemporaryDirectory(dir=directory) as staging_directory:
+        staging = Path(staging_directory)
+        save_college_records(records, staging / filenames[0])
+        save_metadata(metadata, staging / filenames[1])
+        load_college_records(staging / filenames[0])
+        load_metadata(staging / filenames[1])
+        for filename in filenames:
+            if (directory / filename).exists():
+                shutil.copyfile(directory / filename, staging / (filename + ".backup"))
+        replaced = []
+        try:
+            for filename in filenames:
+                os.replace(staging / filename, directory / filename)
+                replaced.append(filename)
+        except OSError:
+            for filename in replaced:
+                backup = staging / (filename + ".backup")
+                if backup.exists():
+                    os.replace(backup, directory / filename)
+                else:
+                    (directory / filename).unlink(missing_ok=True)
+            raise
+
+
+def refresh_college_data(data_directory=None):
+    directory = Path(data_directory) if data_directory is not None else DATA_DIRECTORY
+    try:
+        records = normalize_college_records(fetch_college_records())
+        publish_runtime_cache(records, create_metadata(len(records)), directory)
+    except ValueError as error:
+        return False, str(error)
+    except OSError:
+        return False, "Could not save refreshed data. Please check local folder permissions."
+    return True, f"Refresh successful: saved {len(records)} college records."

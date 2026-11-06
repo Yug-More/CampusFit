@@ -5,12 +5,54 @@
 {% block content %}
 <h1>CampusFit College Explorer</h1>
 <p>Explore colleges and learn about their locations, costs, and student outcomes as you plan your next step.</p>
+<section aria-labelledby="data-heading">
+    <h2 id="data-heading">College data</h2>
+    <p>Current data source: <strong>{{ source }}</strong>. Loaded records: {{ record_count }}.</p>
+    <p>Retrieved (UTC): {{ metadata.get('retrieved_at') or 'Not available' }}</p>
+    {% if status_message %}<p role="status">{{ status_message }}</p>{% endif %}
+    {% if refresh_message %}<p role="status">{{ refresh_message }}</p>{% endif %}
+    <form method="post" action="{{ url_for('explorer') }}">
+        <button type="submit">Refresh Data</button>
+    </form>
+</section>
 <section aria-labelledby="filters-heading">
     <h2 id="filters-heading">College filters</h2>
     <p>Search and filter options will be added here as the College Explorer is developed.</p>
 </section>
 <section aria-labelledby="results-heading">
     <h2 id="results-heading">College results</h2>
-    <p>College information will appear here once the data workflow is connected.</p>
+    <p>Showing {{ colleges|length }} of {{ record_count }} loaded records. This is a limited class-project dataset, not a national search.</p>
+    <p>Graduation rates describe first-time, full-time students completing within 150% of normal time. Earnings describe working, non-enrolled federal-aid recipients ten years after entry. The latest measures may come from different years.</p>
+    {% if colleges %}
+    <table>
+        <caption>College Scorecard institution information</caption>
+        <thead>
+            <tr>
+                <th scope="col">Institution</th>
+                <th scope="col">City</th>
+                <th scope="col">State</th>
+                <th scope="col">Type</th>
+                <th scope="col">In-state tuition and fees</th>
+                <th scope="col">Graduation rate (150% time)</th>
+                <th scope="col">Median earnings (10 years)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for college in colleges %}
+            <tr>
+                <th scope="row">{{ college.name }}</th>
+                <td>{{ college.city or 'Not available' }}</td>
+                <td>{{ college.state or 'Not available' }}</td>
+                <td>{{ college.institution_type or 'Not available' }}</td>
+                <td>{{ '${:,.0f}'.format(college.tuition_in_state) if college.tuition_in_state is not none else 'Not available' }}</td>
+                <td>{{ '{:.1%}'.format(college.graduation_rate) if college.graduation_rate is not none else 'Not available' }}</td>
+                <td>{{ '${:,.0f}'.format(college.median_earnings) if college.median_earnings is not none else 'Not available' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No college records are available. Restore the committed sample files or try Refresh Data.</p>
+    {% endif %}
 </section>
 {% endblock %}

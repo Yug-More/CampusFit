@@ -1,0 +1,41 @@
+school_id,name,city,state,institution_type,student_size,tuition_in_state,tuition_out_of_state,graduation_rate,median_earnings
+100654,Alabama A & M University,Normal,AL,Public,6124,10558,19318,0.2771,41266
+100663,University of Alabama at Birmingham,Birmingham,AL,Public,11635,9812,23684,0.6612,59631
+100690,Amridge University,Montgomery,AL,Private nonprofit,241,,,0.5,40519
+100706,University of Alabama in Huntsville,Huntsville,AL,Public,6591,12458,27148,0.6246,72098
+100724,Alabama State University,Montgomery,AL,Public,3477,11248,19576,0.307,40585
+100751,The University of Alabama,Tuscaloosa,AL,Public,33227,12484,35342,0.7366,66081
+100760,Central Alabama Community College,Alexander City,AL,Public,1203,5520,9450,0.2852,37682
+100812,Athens State University,Athens,AL,Public,2446,,,,54648
+100830,Auburn University at Montgomery,Montgomery,AL,Public,2542,10339,21643,0.3488,51305
+100858,Auburn University,Auburn,AL,Public,26816,13318,36022,0.8206,73273
+101028,Chattahoochee Valley Community College,Phenix City,AL,Public,1110,5520,9450,0.2932,39468
+101116,South University-Montgomery,Montgomery,AL,Private for-profit,299,18145,18145,0.1176,39314
+101143,Enterprise State Community College,Enterprise,AL,Public,1585,5520,9450,0.3768,42181
+101161,Coastal Alabama Community College,Bay Minette,AL,Public,4798,5760,9690,0.3468,40539
+101189,Faulkner University,Montgomery,AL,Private nonprofit,1549,26590,26590,0.3707,48627
+101240,Gadsden State Community College,Gadsden,AL,Public,3548,4608,7752,0.3123,37485
+101277,New Beginning College of Cosmetology,Albertville,AL,Private for-profit,81,,,0.5938,21712
+101286,George C Wallace Community College-Dothan,Dothan,AL,Public,3017,5400,9330,0.3603,36888
+101295,George C Wallace State Community College-Hanceville,Hanceville,AL,Public,4423,5640,9570,0.5153,42807
+101301,George C Wallace State Community College-Selma,Selma,AL,Public,855,5160,9090,0.4706,35468
+101365,Herzing University-Birmingham,Birmingham,AL,Private nonprofit,442,13820,13820,0.2727,44255
+101435,Huntingdon College,Montgomery,AL,Private nonprofit,879,29570,29570,0.4766,54423
+101453,Heritage Christian University,Florence,AL,Private nonprofit,75,12710,12710,,47059
+101462,J. F. Drake State Community and Technical College,Huntsville,AL,Public,755,5685,9615,0.3529,34464
+101471,J F Ingram State Technical College,Deatsville,AL,Public,960,6084,6084,0.5816,
+101480,Jacksonville State University,Jacksonville,AL,Public,7036,13224,23814,0.4752,51004
+101505,Jefferson State Community College,Birmingham,AL,Public,5470,5520,9450,0.2416,43674
+101514,John C Calhoun State Community College,Tanner,AL,Public,7070,5540,9470,0.3849,42337
+101569,Lawson State Community College,Birmingham,AL,Public,2900,5215,9145,0.2393,36457
+101587,University of West Alabama,Livingston,AL,Public,2974,10960,20710,0.3489,47856
+108232,Academy of Art University,San Francisco,CA,Private for-profit,3587,32224,32224,0.3341,44567
+108269,Academy of Chinese Culture and Health Sciences,Oakland,CA,Private nonprofit,,,,,
+108667,College of Alameda,Alameda,CA,Public,4487,1258,10138,0.3061,47627
+108807,Allan Hancock College,Santa Maria,CA,Public,8052,1158,10038,0.3421,46603
+108861,Berkeley School of Theology,Berkeley,CA,Private nonprofit,17,,,,
+108870,American Film Institute Conservatory,Los Angeles,CA,Private nonprofit,,,,,
+108977,American Beauty College,West Covina,CA,Private for-profit,334,,,0.88,30742
+109040,American Career College-Los Angeles,Los Angeles,CA,Private for-profit,2168,,,0.7553,44917
+109208,American River College,Sacramento,CA,Public,25621,1288,12472,0.3888,44544
+109350,Antelope Valley Community College District,Lancaster,CA,Public,11534,1124,9548,0.3296,39944

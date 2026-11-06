@@ -1,0 +1,20 @@
+{
+  "source": "U.S. Department of Education College Scorecard",
+  "endpoint": "https://api.data.gov/ed/collegescorecard/v1/schools",
+  "retrieved_at": "2026-11-06T00:05:24.557277+00:00",
+  "record_count": 40,
+  "requested_fields": [
+    "id",
+    "school.name",
+    "school.city",
+    "school.state",
+    "school.ownership",
+    "latest.student.size",
+    "latest.cost.tuition.in_state",
+    "latest.cost.tuition.out_of_state",
+    "latest.earnings.10_yrs_after_entry.median",
+    "latest.completion.completion_rate_4yr_150nt",
+    "latest.completion.completion_rate_less_than_4yr_150nt"
+  ],
+  "scope_or_limit": "Official sample: 30 operating institutions by ascending ID, plus 10 operating California institutions by ascending ID; two DEMO_KEY requests, 40 records total."
+}
