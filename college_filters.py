@@ -45,7 +45,8 @@ def validate_number(value, label, messages, maximum=None):
 def validate_filters(query, states, institution_types):
     """Keep submitted values for the form, while returning safe filter values."""
     selected = {}
-    for field in ("name", "state", "institution_type", "maximum_tuition", "minimum_graduation"):
+    for field in ("name", "city", "state", "institution_type", "maximum_tuition",
+                  "minimum_graduation", "minimum_size", "maximum_size"):
         selected[field] = query.get(field, "").strip()
     selected["sort"] = query.get("sort", "name").strip()
     selected["limit"] = query.get("limit", "20").strip()
@@ -67,6 +68,17 @@ def validate_filters(query, states, institution_types):
     filters["minimum_graduation"] = None
     if minimum_percentage is not None:
         filters["minimum_graduation"] = minimum_percentage / 100
+    filters["minimum_size"] = validate_number(
+        selected["minimum_size"], "Minimum student enrollment", messages,
+    )
+    filters["maximum_size"] = validate_number(
+        selected["maximum_size"], "Maximum student enrollment", messages,
+    )
+    if filters["minimum_size"] is not None and filters["maximum_size"] is not None:
+        if filters["minimum_size"] > filters["maximum_size"]:
+            messages.append("Minimum student enrollment must not exceed maximum student enrollment. Both enrollment filters were ignored.")
+            filters["minimum_size"] = None
+            filters["maximum_size"] = None
     if selected["sort"] not in SORT_OPTIONS:
         messages.append("Unknown sort option. Results are sorted by college name.")
         filters["sort"] = "name"
@@ -79,8 +91,11 @@ def validate_filters(query, states, institution_types):
 def filter_colleges(college_records, filters):
     matching = []
     search_name = filters.get("name", "").strip().casefold()
+    search_city = filters.get("city", "").strip().casefold()
     for college in college_records:
         if search_name not in college["name"].casefold():
+            continue
+        if search_city not in college["city"].casefold():
             continue
         if filters.get("state") and college["state"] != filters["state"]:
             continue
@@ -93,6 +108,16 @@ def filter_colleges(college_records, filters):
         minimum_graduation = filters.get("minimum_graduation")
         if minimum_graduation is not None:
             if college["graduation_rate"] is None or college["graduation_rate"] < minimum_graduation:
+                continue
+        minimum_size = filters.get("minimum_size")
+        maximum_size = filters.get("maximum_size")
+        if minimum_size is not None or maximum_size is not None:
+            student_size = college["student_size"]
+            if student_size is None:
+                continue
+            if minimum_size is not None and student_size < minimum_size:
+                continue
+            if maximum_size is not None and student_size > maximum_size:
                 continue
         matching.append(college)
     return matching

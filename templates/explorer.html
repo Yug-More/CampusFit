@@ -37,6 +37,10 @@
                 </select>
             </div>
             <div class="form-field">
+                <label for="city">City</label>
+                <input id="city" name="city" type="search" value="{{ selected.city }}">
+            </div>
+            <div class="form-field">
                 <label for="institution-type">Institution type</label>
                 <select id="institution-type" name="institution_type">
                     <option value="">All institution types</option>
@@ -53,6 +57,15 @@
                 <label for="minimum-graduation">Minimum graduation rate (%)</label>
                 <input id="minimum-graduation" name="minimum_graduation" inputmode="decimal" value="{{ selected.minimum_graduation }}" aria-describedby="graduation-help">
                 <small id="graduation-help">Enter 0–100. Excludes unavailable graduation rates when active.</small>
+            </div>
+            <div class="form-field">
+                <label for="minimum-size">Minimum student enrollment</label>
+                <input id="minimum-size" name="minimum_size" inputmode="decimal" value="{{ selected.minimum_size }}" aria-describedby="enrollment-help">
+                <small id="enrollment-help">Non-negative enrollment bounds. Excludes unavailable enrollment when either bound is active.</small>
+            </div>
+            <div class="form-field">
+                <label for="maximum-size">Maximum student enrollment</label>
+                <input id="maximum-size" name="maximum_size" inputmode="decimal" value="{{ selected.maximum_size }}" aria-describedby="enrollment-help">
             </div>
             <div class="form-field">
                 <label for="sort">Sort results</label>
