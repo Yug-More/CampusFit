@@ -37,6 +37,10 @@
                 </select>
             </div>
             <div class="form-field">
+                <label for="city">City</label>
+                <input id="city" name="city" type="search" value="{{ selected.city }}">
+            </div>
+            <div class="form-field">
                 <label for="institution-type">Institution type</label>
                 <select id="institution-type" name="institution_type">
                     <option value="">All institution types</option>
@@ -53,6 +57,15 @@
                 <label for="minimum-graduation">Minimum graduation rate (%)</label>
                 <input id="minimum-graduation" name="minimum_graduation" inputmode="decimal" value="{{ selected.minimum_graduation }}" aria-describedby="graduation-help">
                 <small id="graduation-help">Enter 0–100. Excludes unavailable graduation rates when active.</small>
+            </div>
+            <div class="form-field">
+                <label for="minimum-size">Minimum student enrollment</label>
+                <input id="minimum-size" name="minimum_size" inputmode="decimal" value="{{ selected.minimum_size }}" aria-describedby="enrollment-help">
+                <small id="enrollment-help">Non-negative enrollment bounds. Excludes unavailable enrollment when either bound is active.</small>
+            </div>
+            <div class="form-field">
+                <label for="maximum-size">Maximum student enrollment</label>
+                <input id="maximum-size" name="maximum_size" inputmode="decimal" value="{{ selected.maximum_size }}" aria-describedby="enrollment-help">
             </div>
             <div class="form-field">
                 <label for="sort">Sort results</label>
@@ -72,10 +85,12 @@
     </form>
     <div class="form-actions">
         <button type="submit" form="explorer-filters">Apply Filters</button>
+        <button type="submit" form="explorer-filters" formaction="{{ url_for('export_colleges') }}" class="secondary-button">Export Matching Results</button>
         <form id="reset-filters" method="get" action="{{ url_for('explorer') }}">
             <button type="submit" class="secondary-button">Reset Filters</button>
         </form>
     </div>
+    <p>Export downloads all matching records in the selected order, ignoring the results limit.</p>
 </section>
 <section aria-labelledby="results-heading">
     <h2 id="results-heading">College results</h2>
@@ -102,7 +117,7 @@
         <tbody>
             {% for college in colleges %}
             <tr>
-                <th scope="row">{{ college.name }}</th>
+                <th scope="row"><a href="{{ url_for('college_detail', school_id=college.school_id, **selected) }}">{{ college.name }}</a></th>
                 <td>{{ college.city or 'Not available' }}</td>
                 <td>{{ college.state or 'Not available' }}</td>
                 <td>{{ college.institution_type or 'Not available' }}</td>

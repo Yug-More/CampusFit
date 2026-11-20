@@ -166,7 +166,7 @@ class ExplorerFilterRouteTests(unittest.TestCase):
             self.assertIn(f'value="{value}" selected', page)
         self.assertIn("Matching records: 1", page)
         self.assertIn("Displayed results: 1", page)
-        self.assertNotIn("beta University</th>", page)
+        self.assertNotIn(">beta University</a>", page)
 
     def test_reset_url_has_no_query_parameters(self):
         page = self.client.get("/explorer?state=CA").get_data(as_text=True)
@@ -211,7 +211,7 @@ class ExplorerFilterRouteTests(unittest.TestCase):
         self.assertIn("Loaded records: 19", page)
         self.assertIn("Matching records: 19", page)
         self.assertIn("Displayed results: 10", page)
-        self.assertLess(page.index("beta University</th>"), page.index("Alpha College</th>"))
+        self.assertLess(page.index(">beta University</a>"), page.index(">Alpha College</a>"))
 
 
 if __name__ == "__main__":
