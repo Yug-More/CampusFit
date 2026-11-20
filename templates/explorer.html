@@ -85,10 +85,12 @@
     </form>
     <div class="form-actions">
         <button type="submit" form="explorer-filters">Apply Filters</button>
+        <button type="submit" form="explorer-filters" formaction="{{ url_for('export_colleges') }}" class="secondary-button">Export Matching Results</button>
         <form id="reset-filters" method="get" action="{{ url_for('explorer') }}">
             <button type="submit" class="secondary-button">Reset Filters</button>
         </form>
     </div>
+    <p>Export downloads all matching records in the selected order, ignoring the results limit.</p>
 </section>
 <section aria-labelledby="results-heading">
     <h2 id="results-heading">College results</h2>
