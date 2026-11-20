@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{{ college.name if college else 'College not found' }} | CampusFit{% endblock %}
+
+{% block content %}
+{% if college %}
+<h1>{{ college.name }}</h1>
+<p>Institution information from the currently loaded College Scorecard data.</p>
+<section aria-labelledby="details-heading">
+    <h2 id="details-heading">College details</h2>
+    <dl class="college-details">
+        <div><dt>City</dt><dd>{{ college.city or 'Not available' }}</dd></div>
+        <div><dt>State</dt><dd>{{ college.state or 'Not available' }}</dd></div>
+        <div><dt>Institution type</dt><dd>{{ college.institution_type or 'Not available' }}</dd></div>
+        <div><dt>Student size</dt><dd>{{ '{:,}'.format(college.student_size) if college.student_size is not none else 'Not available' }}</dd></div>
+        <div><dt>In-state tuition and fees</dt><dd>{{ '${:,.0f}'.format(college.tuition_in_state) if college.tuition_in_state is not none else 'Not available' }}</dd></div>
+        <div><dt>Out-of-state tuition and fees</dt><dd>{{ '${:,.0f}'.format(college.tuition_out_of_state) if college.tuition_out_of_state is not none else 'Not available' }}</dd></div>
+        <div><dt>Graduation rate (150% time)</dt><dd>{{ '{:.1%}'.format(college.graduation_rate) if college.graduation_rate is not none else 'Not available' }}</dd></div>
+        <div><dt>Median earnings (10 years after entry)</dt><dd>{{ '${:,.0f}'.format(college.median_earnings) if college.median_earnings is not none else 'Not available' }}</dd></div>
+    </dl>
+    <p>Graduation rates concern first-time, full-time students completing within 150% of normal time. Earnings concern working, non-enrolled federal-aid recipients. Measures may describe different reporting years.</p>
+</section>
+{% else %}
+<h1>College not found</h1>
+<p>This institution is not available in the currently loaded dataset. It may be outside the limited dataset or no longer present after a refresh.</p>
+{% endif %}
+<p><a href="{{ back_url }}">Back to College Explorer</a></p>
+{% endblock %}

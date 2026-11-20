@@ -63,6 +63,12 @@ h2 {
     line-height: 1.3;
 }
 
+h1,
+tbody th,
+.college-details dd {
+    overflow-wrap: anywhere;
+}
+
 section {
     margin-top: 1.5rem;
     padding: 1.5rem;
@@ -180,4 +186,18 @@ thead {
 
 tbody tr:nth-child(even) {
     background: #f8fafc;
+}
+
+.college-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 1rem;
+}
+
+.college-details dt {
+    font-weight: bold;
+}
+
+.college-details dd {
+    margin: 0.25rem 0 0;
 }

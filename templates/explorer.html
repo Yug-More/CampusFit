@@ -102,7 +102,7 @@
         <tbody>
             {% for college in colleges %}
             <tr>
-                <th scope="row">{{ college.name }}</th>
+                <th scope="row"><a href="{{ url_for('college_detail', school_id=college.school_id, **selected) }}">{{ college.name }}</a></th>
                 <td>{{ college.city or 'Not available' }}</td>
                 <td>{{ college.state or 'Not available' }}</td>
                 <td>{{ college.institution_type or 'Not available' }}</td>

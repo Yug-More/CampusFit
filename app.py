@@ -39,6 +39,19 @@ def explorer():
     )
 
 
+@app.route("/college/<int:school_id>")
+def college_detail(school_id):
+    records = get_available_college_data()[0]
+    states, institution_types = get_filter_options(records)
+    selected, _, _ = validate_filters(request.args, states, institution_types)
+    back_query = {key: value for key, value in selected.items() if key in request.args}
+    back_url = url_for("explorer", **back_query)
+    for college in records:
+        if college["school_id"] == school_id:
+            return render_template("college_detail.html", college=college, back_url=back_url)
+    return render_template("college_detail.html", college=None, back_url=back_url), 404
+
+
 @app.route("/simulator")
 def simulator():
     return render_template("simulator_placeholder.html")
