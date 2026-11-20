@@ -64,7 +64,6 @@ h2 {
 }
 
 h1,
-tbody th,
 .college-details dd {
     overflow-wrap: anywhere;
 }
@@ -186,6 +185,11 @@ thead {
 
 tbody tr:nth-child(even) {
     background: #f8fafc;
+}
+
+tbody th {
+    min-width: 12rem;
+    overflow-wrap: break-word;
 }
 
 .college-details {
