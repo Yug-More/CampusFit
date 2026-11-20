@@ -12,7 +12,8 @@ Students comparing colleges must consider location, tuition, graduation rates, a
 student outcomes, often across different sources and reporting years. CampusFit
 organizes public U.S. Department of Education College Scorecard information in one
 interface. The College Explorer lets students search institutions, combine filters,
-and examine available costs and outcomes.
+and examine available costs and outcomes. Individual college profiles and CSV
+downloads use the same normalized local records.
 
 The planned Decision Simulator will let students adjust personal priorities and
 compare colleges through weighted rankings and charts. This CS 122 final project
@@ -28,6 +29,7 @@ the simulator and analysis remain under development.
 | Local CSV and metadata storage | Complete | Yug Amol More |
 | College Explorer | Complete | Yug Amol More |
 | Filtering and sorting | Complete | Yug Amol More |
+| College profiles and matching CSV export | Complete | Yug Amol More |
 | Partner data contract | Complete | Yug Amol More |
 | Decision Simulator | In development; placeholder only | Sean Aminov |
 | Weighted college analysis | In development | Sean Aminov |
@@ -42,8 +44,10 @@ the simulator and analysis remain under development.
 - Validated local CSV records, separate JSON metadata, and preservation of the
   last usable cache when refresh fails.
 - A genuine committed sample for demonstrations without an API key or live access.
-- College-name, state, institution-type, maximum in-state tuition, and minimum
-  graduation-rate filters that can be combined.
+- College-name, city, state, institution-type, tuition, graduation-rate, and
+  enrollment-range filters that can be combined.
+- Individual college profile pages using only the fields already in the data contract.
+- CSV export of every matching record in the selected order, regardless of display limit.
 - Six sort options and limits of 10, 20, 50, or all matching local records.
 - Honest missing-value display, input validation, result counts, and manual refresh.
 - Shared Flask/Jinja pages with responsive controls, a horizontally scrollable
@@ -52,14 +56,15 @@ the simulator and analysis remain under development.
 ### In development
 
 Sean's assigned work includes preference-based weighted ranking, the What-If
-Decision Simulator, and college comparison charts. The simulator route currently
-shows a temporary placeholder; no ranking, analysis, or visualization is implemented.
+Decision Simulator, and college comparison charts. On `main` and this Explorer
+branch, the simulator route currently shows a temporary placeholder. Sean's separate `feature/decision-simulator-analysis` branch contains
+ranking-analysis work; it has not been merged or integrated here.
 
 ## Screenshots
 
 ![College Explorer with filters](docs/images/college-explorer.png)
 
-*College Explorer with filters, data-source status, and the committed official sample.*
+*College Explorer with city and enrollment filters, data-source status, and the official sample.*
 
 ## Technology stack
 
@@ -98,6 +103,7 @@ CampusFit/
 ├── templates/
 │   ├── base.html
 │   ├── explorer.html
+│   ├── college_detail.html
 │   └── simulator_placeholder.html
 ├── static/
 │   └── css/
@@ -107,6 +113,7 @@ CampusFit/
     │   └── scorecard_sample.json
     ├── test_college_data.py
     ├── test_college_filters.py
+    ├── test_explorer_tools.py
     └── test_routes.py
 ```
 
@@ -125,10 +132,10 @@ use `python`; use your system's `python3` command if needed.
 
 ### 1. Clone the implementation branch
 
-While this work is on the feature branch, clone it explicitly:
+To try the Explorer tools before they are merged, clone this feature branch explicitly:
 
 ```bash
-git clone --branch feature/college-explorer-data https://github.com/Yug-More/CampusFit.git
+git clone --branch feature/explorer-tools https://github.com/Yug-More/CampusFit.git
 cd CampusFit
 python -m venv .venv
 ```
@@ -198,20 +205,24 @@ there; `/simulator` displays Sean's placeholder. Debug mode is disabled.
 
 ## Using CampusFit
 
-The Explorer has **10 functional widgets**: seven input/select controls and the
-Apply Filters, Reset Filters, and Refresh Data buttons. Navigation links, static
-text, and result tables are not included in that count.
+The Explorer has **14 functional widgets**: ten input/select controls and the
+Apply Filters, Export Matching Results, Reset Filters, and Refresh Data buttons.
+Navigation links, static text, and result tables are not included in that count.
 
 | Control | Behavior |
 |---|---|
 | College name | Case-insensitive partial matching; surrounding spaces are ignored |
+| City | Case-insensitive partial matching; surrounding spaces are ignored |
 | State | All states or a state present in the loaded data; options are alphabetical |
 | Institution type | All types or one ownership type present in the loaded data |
 | Maximum in-state tuition | Non-negative dollar amount, including fees; matches values at or below it |
 | Minimum graduation rate (%) | A percentage from 0–100; matches rates at or above it |
+| Minimum student enrollment | Non-negative lower enrollment bound, inclusive |
+| Maximum student enrollment | Non-negative upper enrollment bound, inclusive |
 | Sort results | Name A–Z; in-state tuition low–high or high–low; graduation rate, median earnings, or student size high–low |
 | Results limit | 10, 20 (default), 50, or All matching local records |
 | Apply Filters | Submits a GET form and preserves selections in the URL and form |
+| Export Matching Results | Downloads all matching records with the current filters and sort order; ignores the display limit |
 | Reset Filters | Submits an empty GET form to `/explorer`; restores name sorting and the 20-result limit |
 | Refresh Data | Submits a separate POST request; saves validated data and redirects to the default Explorer on success |
 
@@ -222,14 +233,39 @@ never calls the API and does not change saved records.
 The tuition filter uses **in-state tuition only**, never a combination with
 out-of-state tuition. Active tuition and graduation filters exclude unavailable
 values, even when their threshold is zero. Graduation input is converted from a
-percentage to a fraction: 60 is compared with 0.60. Numeric sorts put missing values
-last in either direction, using college name to break ties.
+percentage to a fraction: 60 is compared with 0.60. Enrollment bounds are inclusive;
+missing enrollment is excluded only when a valid enrollment bound is active.
+The minimum must not exceed the maximum. If it does, both enrollment bounds are
+ignored with a message, while other filters remain active. Numeric sorts put missing
+values last in either direction, using college name to break ties.
 
 Invalid numeric filters are ignored with a message. Unknown state/type selections
 are ignored; unknown sort/limit values fall back to name/20. Other valid filters
 still apply. Empty matches show guidance. Reset clears filters without erasing data.
 If refresh has no key or fails, the page explains the problem and continues using
 available local data without exposing raw request details.
+
+### College profiles and CSV downloads
+
+Select an institution name in the results table to open `/college/<school_id>`.
+The profile shows name, city, state, ownership type, enrollment, both tuition
+amounts, graduation rate, and median earnings from the existing local loader.
+Formatting and missing-value display match the Explorer. Use **Back to College
+Explorer** to retain the submitted filters, sort, and limit. Profiles do not make
+live requests. IDs outside the currently loaded dataset return a helpful HTTP 404.
+
+**Export Matching Results** submits the same filter form to `/explorer/export`.
+The download includes all matching records in the chosen sort order, even when
+only 10 results are displayed. Submitted form values are validated exactly as in
+the Explorer; invalid values are ignored using the same defaults. The download is
+named `campusfit_colleges.csv`, has a CSV header with the normalized columns below,
+and is created in memory without a permanent server file. Money and enrollment
+remain numeric, graduation rates remain fractions from 0 to 1, and missing values
+remain blank. CSV quoting preserves commas, quotation marks, and line breaks.
+
+Profiles and exports use only the limited currently loaded dataset. A profile may
+become unavailable after a refresh, and export does not download more institutions.
+Neither feature adds ranking, scoring, or simulator behavior.
 
 Example reproducible URL:
 
@@ -240,10 +276,13 @@ Example reproducible URL:
 1. Open College Explorer and identify the official College Scorecard source.
 2. Show the current data source, retrieval time, and loaded count.
 3. Search for `Arizona`.
-4. Combine State `AZ` and Institution type `Public`.
-5. Change the sorting method and result limit.
-6. Use Reset Filters to restore the default view.
-7. Explain the sample fallback and use Refresh Data: without a key it shows setup
+4. Combine State `AZ`, City `Tempe`, and enrollment bounds of 60,000–70,000
+   (enter `60000` and `70000`, without commas).
+5. Open a matching college profile and return with the back link.
+6. Change the sorting method and result limit, then use Export Matching Results.
+   Explain that the CSV includes every matching record, not only displayed rows.
+7. Use Reset Filters to restore the default view.
+8. Explain the sample fallback and use Refresh Data: without a key it shows setup
    guidance; with a key it requests the bounded official subset.
 
 <a id="official-source-and-verified-fields"></a>
@@ -336,11 +375,12 @@ From the repository root with dependencies installed:
 python -m unittest discover -s tests -v
 ```
 
-**76 tests pass.** Tests use small synthetic fixtures and mocked requests; they do
+**108 tests pass.** Tests use small synthetic fixtures and mocked requests; they do
 not make live API calls. Coverage includes normalization, ownership codes, API
 responses and failures, pagination limits, CSV/metadata storage, cache preservation,
 sample fallback, portable paths, filters, sorting, limits, validation, Flask routes,
-HTML escaping, and missing-value/metadata display.
+HTML escaping, missing-value/metadata display, college profiles, city/enrollment
+filters, and in-memory matching CSV exports.
 
 A separate clean local clone and isolated virtual environment were verified with
 Python 3.13.2: dependency installation, all tests, imports, and no-key Explorer,
@@ -352,7 +392,7 @@ these are separate from the unit tests.
 
 - [x] Official web-data access, documented fields, and bounded retrieval.
 - [x] Validated local CSV, metadata JSON, and committed sample fallback.
-- [x] College Explorer with ten functional widgets and updated results/counts.
+- [x] College Explorer with fourteen functional widgets and updated results/counts.
 - [x] Honest missing-data handling and portable file paths.
 - [x] Installation, run, API-key, test, demo, and integration instructions.
 - [x] Limitations and future improvements documented; Sean's unfinished work identified.
@@ -396,6 +436,7 @@ policy without changing the source records.
 - [x] College Scorecard data workflow
 - [x] Official sample-data fallback
 - [x] College Explorer filters and sorting
+- [x] College profiles, city/enrollment filters, and matching CSV export
 - [x] Partner data contract
 - [ ] Weighted scoring model
 - [ ] Decision Simulator
